@@ -1,0 +1,105 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+  }
+  .login-and-form-container {
+    display: flex;
+    justify-content: space-between;
+    width: 30%;
+  }
+  .login-img {
+    display: none;
+  }
+  @media (min-width: 768px) {
+    .login-img {
+      width: 50%;
+      display: block;
+    }
+  }
+  .logo {
+    height: 41.99925994873047px;
+    width: 82px;
+    height: 60px;
+    left: 1011px;
+    top: 343px;
+    border-radius: 0px;
+    align-self: center;
+    margin-bottom: 0px;
+  }
+  .heading {
+    font-family: sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 32px;
+    letter-spacing: 0px;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .form-container {
+    background: #fefeff;
+    box-shadow: 0px 8px 40px rgba(7, 7, 7, 0.08);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    padding-top: 40px;
+    padding-bottom: 40px;
+    padding-left: 20px;
+    padding-right: 20px;
+    width: 100%;
+    margin-left: 50px;
+  }
+  @media (max-width: 768px) {
+    .form-container {
+      box-shadow: none;
+    }
+  }
+  .input-container {
+    display: flex;
+    flex-direction: column;
+    margin: 10px;
+  }
+  .label {
+    font-family: sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: 0.01em;
+    text-align: left;
+  }
+  .input {
+    height: 40px;
+    width: 100%;
+    left: 0px;
+    top: 24px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    background: #eeeeee;
+    border: none;
+    margin-top: 5px;
+    padding-left: 10px;
+    font-family: sans-serif;
+  }
+  .login-button {
+    height: 40px;
+    left: 0px;
+    top: 0px;
+    border-radius: 8px;
+    background: #4094ef;
+    color: #ffffff;
+    border: none;
+    margin: 10px;
+    font-family: sans-serif;
+  }
+  .error-msg {
+    font-family: sans-serif;
+    font-size: 12px;
+    color: #ef4444;
+    margin-left: 10px;
+    margin-top: 0px;
+    padding-top: 0px;
+    align-self: flex-start;
+  }

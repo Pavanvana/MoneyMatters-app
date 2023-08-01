@@ -1,0 +1,72 @@
+.debit-credit-overview-container{
+    width: 1050px;
+    height: 364px;
+    flex-shrink: 0;
+    border-radius: 25px;
+    background: #FFF;
+    padding: 40px;
+}
+.debit-credit-overview-name{
+    color: #333B69;
+    font-family: sans-serif;
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    margin-top: 25px;
+    margin-bottom: 10px;
+}
+.credit-debit-in-this-week{
+    color: #333B69;
+    font-family: sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+.debitted{
+    color: #718EBF;
+    font-family: sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+.credit-debit-checkbox{
+    display: flex;
+    align-self: center;
+}
+.top-align{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.type{
+    color: #718EBF;
+    font-family: sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-left: 10px;
+}
+.debit-checkbox{
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    background: #4C78FF;
+}
+.credit-checkbox{
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    background: #FCAA0B;
+}
+.checkbox-container{
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}

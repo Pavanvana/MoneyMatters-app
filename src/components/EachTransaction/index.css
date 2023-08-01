@@ -1,0 +1,92 @@
+.transaction-item{
+    width: 1061px;
+    height: 58px;
+    flex-shrink: 0;
+    border-bottom: 1px solid #E2E2E2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 20px;
+    margin-left: 20px;
+}
+.transaction-name-container{
+    display: flex;
+    align-items: center;
+}
+.transaction-name{
+    color: #505887;
+    font-family: sans-serif;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    margin-left: 20px;
+}
+.transaction-type{
+    color: #718EBF;
+    font-family: sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    width: 190px;
+    text-align: start;
+}
+.transaction-date{
+    color: #718EBF;
+    font-family: sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-left: 10px;
+    width: 130px;
+}
+.transaction-amount{
+    text-align: right;
+    font-family: sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    margin-right: 60px;
+    width: 150px;
+}
+.creditAmount{
+    color: #16DBAA;
+}
+.debitAmount{
+    color: #FE5C73;
+}
+.edit-delete-button{
+    border: none;
+    background: none;
+    margin-left: 15px;
+}
+.edit-delete-img{
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+.transaction-type-icon{
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    margin-left: 15px;
+}
+.last-transaction-item{
+    width: 1061px;
+    height: 58px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 20px;
+}
+.users-profile-admin{
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    margin-left: 20px;
+    margin-top: 4px;
+}

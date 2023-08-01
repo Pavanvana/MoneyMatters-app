@@ -1,0 +1,126 @@
+.main-container{
+    display: flex;
+}
+.home-container{
+    height: 100vh;
+    overflow: scroll;
+}
+.website-logo{
+    height: 38px;
+    width: 44px;
+}
+.heading-container{
+    display: flex;
+    width: 1120px;
+    padding: 24px 40px;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    background-color: #ffffff;
+}
+.accounts-heading{
+    color: #343C6A;
+    font-family: sans-serif;
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+.accounts-container{
+    background: #F5F7FA;
+    min-height: 80vh;
+    padding-top: 30px;
+    padding-right: 50px;
+    padding-left: 50px;
+    padding-bottom: 40px;
+    margin-top: 80px;
+}
+.credit-debit-container{
+    display: flex;
+    flex-direction: column;
+}
+@media (min-width: 768px) {
+    .credit-debit-container{
+        flex-direction: row;
+    }
+}
+.credit-container{
+    display: flex;
+    width: 460px;
+    height: 148px;
+    padding: 25px 36px;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    flex-shrink: 0;
+    border-radius: 25px;
+    background: #FFF;
+    padding-left: 36px;
+    padding-right: 36px;
+    padding-top: 25px;
+    padding-bottom: 25px;
+    margin-right: 30px;
+    margin-bottom: 20px;
+}
+@media (min-width: 768px){
+    .credit-container{
+        margin-bottom: 0px;
+    }
+}
+.amount-credit-container{
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+}
+.credit-amount{
+    color: #16DBAA;
+    font-family: sans-serif;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+.debit-amount{
+    color: #FE5C73;
+    font-family: sans-serif;
+    font-size: 25px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+.credit-name{
+    color: #718EBF;
+    font-family: sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+.credit-img{
+    width: 182.431px;
+    height: 161px;
+}
+.last-transaction-heading{
+    color: #333B69;
+    font-family: sans-serif;
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    padding-top: 20px;
+    padding-bottom: 10px;
+}
+.last-transactions-container{
+    display: flex;
+    width: 1050px;
+    height: 190px;
+    padding: 12px 25px 8px 15px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    flex-shrink: 0;
+    border-radius: 25px;
+    background: #FFF;
+    padding-right: 50px;
+}

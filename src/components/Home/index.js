@@ -1,11 +1,13 @@
-import { Component } from "react";
+import { useState , useEffect} from "react";
+
 import AddTransaction from '../AddTransaction'
-import './index.css'
 import SideBar from "../SideBar"
 import BarCharts from '../BarCharts'
 import Loader from 'react-loader-spinner'
 import Cookies from 'js-cookie'
 import EachTransaction from "../EachTransaction";
+
+import './index.css'
 
 const apiStatusConstants = {
     initial: 'INITIAL',
@@ -14,20 +16,19 @@ const apiStatusConstants = {
     inProgress: 'IN_PROGRESS',
 }
 
-class Home extends Component{
-    state = {
-        creditSum: "",
-        debitSum: "",
-        apiStatus: apiStatusConstants.initial,
-        recentThreeTrensactionList: [],
-    }
-    componentDidMount = () => {
-        this.getCreditAndDebitSum()
-        this.getRecentThreeTransactions()
-    }
+const Home = () => {
+    const [creditSum, changeCreditSum] = useState('')
+    const [debitSum, changeDebitSum] = useState('')
+    const [apiStatus, changeApiStatus] = useState(apiStatusConstants.initial)
+    const [recentThreeTrensactionList, changeRecentThreeTrensactionList] = useState([])
 
-    getRecentThreeTransactions = async () => {
-      this.setState({apiStatus: apiStatusConstants.inProgress})
+    useEffect(() => {
+        getCreditAndDebitSum()
+        getRecentThreeTransactions()
+    }, [])
+
+    const getRecentThreeTransactions = async () => {
+      changeApiStatus(apiStatusConstants.inProgress)
       const url = " https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=3&offset=0"
       const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
       const userId = Cookies.get('user_id')
@@ -43,28 +44,28 @@ class Home extends Component{
       const response = await fetch(url, options)
       const data = await response.json()
       if (response.ok){
-        this.setState({recentThreeTrensactionList: [...data.transactions], apiStatus: apiStatusConstants.success})
+        changeRecentThreeTrensactionList([...data.transactions])
+        changeApiStatus(apiStatusConstants.success)
       }else{
-        this.setState({apiStatus: apiStatusConstants.failure})
+        changeApiStatus(apiStatusConstants.failure)
       }
     }
 
-    renderSuccessView = () => {
-      const {recentThreeTrensactionList} = this.state
+    const renderSuccessView = () => {
       return(
         <ul className="last-transactions-container">
           {recentThreeTrensactionList.map(eachTransaction => (
-            <EachTransaction key={eachTransaction.id} deleteTransaction={this.deleteTransaction} transactionDetails={eachTransaction}/>
+            <EachTransaction key={eachTransaction.id} deleteTransaction={deleteTransaction} transactionDetails={eachTransaction}/>
           ))}
         </ul>
       )
     }
 
-    onClickReTry = () => {
+    const onClickReTry = () => {
       this.getRecentThreeTransactions()
     }
     
-    renderFailureView = () => (
+    const renderFailureView = () => (
         <div className="failure-container">
             <img
             src="https://res.cloudinary.com/daflxmokq/image/upload/v1677128965/alert-triangle_yavvbl.png"
@@ -75,34 +76,33 @@ class Home extends Component{
             <button
             className="tryagain-btn"
             type="button"
-            onClick={this.onClickReTry}
+            onClick={onClickReTry}
             >
             Try again
             </button>
         </div>
     )
 
-    renderLoadingView = () => (
+    const renderLoadingView = () => (
         <div className="loader-container" testid="loader">
           <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
         </div>
     )
 
-    onRenderLastThreeTrs = () => {
-      const {apiStatus} = this.state
+    const onRenderLastThreeTrs = () => {
       switch (apiStatus) {
         case apiStatusConstants.success:
-            return this.renderSuccessView()
+            return renderSuccessView()
         case apiStatusConstants.failure:
-            return this.renderFailureView()
+            return renderFailureView()
         case apiStatusConstants.inProgress:
-            return this.renderLoadingView()
+            return renderLoadingView()
         default:
             return null
         }
     }
 
-    getCreditAndDebitSum = async () => {
+    const getCreditAndDebitSum = async () => {
       const userId = Cookies.get('user_id')
       const url = userId === '3' ? "https://bursting-gelding-24.hasura.app/api/rest/transaction-totals-admin" : "https://bursting-gelding-24.hasura.app/api/rest/credit-debit-totals"
       const userOrAdmin = userId === '3' ? "admin" : "user"
@@ -128,11 +128,14 @@ class Home extends Component{
            creditSumData = data.totals_credit_debit_transactions.find(each => each.type === 'credit')
            debitSumData = data.totals_credit_debit_transactions.find(each => each.type === 'debit')
         }
-        this.setState({creditSum:creditSumData.sum, debitSum: debitSumData.sum})
+        let creditData = creditSumData === undefined ? 0 : creditSumData.sum 
+        let debitData = debitSumData === undefined ? 0 : debitSumData.sum
+        changeCreditSum(creditData)
+        changeDebitSum(debitData)
       }
     }
 
-    deleteTransaction = async (id) => {
+    const deleteTransaction = async (id) => {
       const url = " https://bursting-gelding-24.hasura.app/api/rest/delete-transaction";
       const userId = Cookies.get('user_id')
       const deleteTransactionId = {
@@ -153,41 +156,38 @@ class Home extends Component{
       window.location.reload(false)
     }
 
-    render(){
-        const { creditSum, debitSum} = this.state
-        return(
-            <div className="main-container">
-                <SideBar/>
-                <div className="home-container">
-                    <div className="heading-container">
-                        <h1 className="accounts-heading">Accounts</h1>
-                        <AddTransaction/>
-                    </div>
-                    <div className="accounts-container">
-                        <div className="credit-debit-container">
-                            <div className="credit-container">
-                                <div className="amount-credit-container">
-                                    <h1 className="credit-amount">${creditSum}</h1>
-                                    <p className="credit-name">Credit</p>
-                                </div>
-                                <img className="credit-img" src="https://res.cloudinary.com/daflxmokq/image/upload/v1690631804/Group_1_dcvrzx.jpg" alt="credit"/>
+    return(
+        <div className="main-container">
+            <SideBar/>
+            <div className="home-container">
+                <div className="heading-container">
+                    <h1 className="accounts-heading">Accounts</h1>
+                    <AddTransaction/>
+                </div>
+                <div className="accounts-container">
+                    <div className="credit-debit-container">
+                        <div className="credit-container">
+                            <div className="amount-credit-container">
+                                <h1 className="credit-amount">${creditSum}</h1>
+                                <p className="credit-name">Credit</p>
                             </div>
-                            <div className="credit-container">
-                                <div className="amount-credit-container">
-                                    <h1 className="debit-amount">${debitSum}</h1>
-                                    <p className="credit-name">Debit</p>
-                                </div>
-                                <img src="https://res.cloudinary.com/daflxmokq/image/upload/v1690631794/Group_2_klo0rc.jpg" alt="debit"/>
-                            </div>
+                            <img className="credit-img" src="https://res.cloudinary.com/daflxmokq/image/upload/v1690631804/Group_1_dcvrzx.jpg" alt="credit"/>
                         </div>
-                          <h2 className="last-transaction-heading">Last Transaction</h2>
-                            {this.onRenderLastThreeTrs()}
-                          <h2 className="debit-credit-overview-name">Debit & Credit Overview</h2>
-                          <BarCharts/>
+                        <div className="credit-container">
+                            <div className="amount-credit-container">
+                                <h1 className="debit-amount">${debitSum}</h1>
+                                <p className="credit-name">Debit</p>
+                            </div>
+                            <img src="https://res.cloudinary.com/daflxmokq/image/upload/v1690631794/Group_2_klo0rc.jpg" alt="debit"/>
+                        </div>
                     </div>
+                      <h2 className="last-transaction-heading">Last Transaction</h2>
+                        {onRenderLastThreeTrs()}
+                      <h2 className="debit-credit-overview-name">Debit & Credit Overview</h2>
+                      <BarCharts/>
                 </div>
             </div>
-        )
-    }
+        </div>
+    )
 }
 export default Home

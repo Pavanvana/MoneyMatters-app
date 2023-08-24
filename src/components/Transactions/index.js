@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useState, useEffect } from "react";
 import SideBar from "../SideBar";
 import AddTransaction from '../AddTransaction'
 import EachType from "../EachType";
@@ -30,19 +30,17 @@ const apiStatusConstants = {
 }
 
 
-class Transactions extends Component{
-    state = {
-        activeTabId: transactionsTypes[0].id,
-        apiStatus: apiStatusConstants.initial,
-        transactionsList: []
-    }
+const Transactions = () => {
+    const [activeTabId, changeActiveTabId] = useState(transactionsTypes[0].id)
+    const [apiStatus, changeApiStatus] = useState(apiStatusConstants.initial)
+    const [transactionsList, changeTransactionList] = useState([])
 
-    componentDidMount = () => {
-        this.getTransactionsData()
-    }
+    useEffect(() => {
+        getTransactionsData()
+    },[])
 
-    getTransactionsData= async () => {
-        this.setState({apiStatus: apiStatusConstants.inProgress})
+    const getTransactionsData= async () => {
+        changeApiStatus( apiStatusConstants.inProgress )
         const url = "https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=1000&offset=1"
         const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
         const userId = Cookies.get('user_id')
@@ -58,17 +56,18 @@ class Transactions extends Component{
         const response = await fetch(url, options)
         const data = await response.json()
         if (response.ok){
-            this.setState({transactionsList: [...data.transactions], apiStatus: apiStatusConstants.success})
+            changeApiStatus( apiStatusConstants.success )
+            changeTransactionList([...data.transactions])
         }else{
-            this.setState({apiStatus: apiStatusConstants.failure})
+            changeApiStatus( apiStatusConstants.failure )
         }
     }
 
-    onClickReTry = () => {
-        this.getTransactionsData()
+    const onClickReTry = () => {
+        getTransactionsData()
     }
     
-    renderFailureView = () => (
+    const renderFailureView = () => (
         <div className="failure-container">
             <img
             src="https://res.cloudinary.com/daflxmokq/image/upload/v1677128965/alert-triangle_yavvbl.png"
@@ -79,21 +78,20 @@ class Transactions extends Component{
             <button
             className="tryagain-btn"
             type="button"
-            onClick={this.onClickReTry}
+            onClick={onClickReTry}
             >
             Try again
             </button>
         </div>
     )
 
-    renderLoadingView = () => (
+    const renderLoadingView = () => (
         <div className="loader-container" testid="loader">
           <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
         </div>
     )
 
-    deleteTransaction = async (id) => {
-        console.log(id)
+    const deleteTransaction = async (id) => {
         const url = " https://bursting-gelding-24.hasura.app/api/rest/delete-transaction";
         const userId = Cookies.get('user_id')
         const deleteTransactionId = {
@@ -114,8 +112,7 @@ class Transactions extends Component{
         window.location.reload(false)
     }
 
-    renderSuccessView = () => {
-        const {transactionsList, activeTabId} = this.state
+    const renderSuccessView = () => {
         const filterTrList = transactionsList.filter(eachTr => {
             if (activeTabId === 1){
                 return eachTr
@@ -136,54 +133,50 @@ class Transactions extends Component{
             <hr className="hr-line"/>
             <ul className="transactions-container">
                 {filterTrList.map(eachTransaction => (
-                    <EachTransaction key={eachTransaction.id} deleteTransaction={this.deleteTransaction} transactionDetails={eachTransaction} />
+                    <EachTransaction key={eachTransaction.id} deleteTransaction={deleteTransaction} transactionDetails={eachTransaction} />
                 ))}
             </ul>
             </>
         )
     }
 
-    onRenderTransactions = () => {
-        const {apiStatus} = this.state
+    const onRenderTransactions = () => {
 
         switch (apiStatus) {
         case apiStatusConstants.success:
-            return this.renderSuccessView()
+            return renderSuccessView()
         case apiStatusConstants.failure:
-            return this.renderFailureView()
+            return renderFailureView()
         case apiStatusConstants.inProgress:
-            return this.renderLoadingView()
+            return renderLoadingView()
         default:
             return null
         }
     }
 
-    setActiveTabId = tabId => {
-        this.setState({activeTabId: tabId})
+    const setActiveTabId = tabId => {
+        changeActiveTabId(tabId)
     }
 
-    render(){
-        const {activeTabId} = this.state
-        return(
-            <div className="main-container">
-                <SideBar/>
-                <div>
-                    <div className="heading-container">
-                    <h1 className="accounts-heading">Transactions</h1>
-                    <AddTransaction/>
-                    </div>
-                    <ul className="transactions-types">
-                        {transactionsTypes.map(eachType => (
-                            <EachType key={eachType.id} setActiveTabId={this.setActiveTabId} isActive={eachType.id === activeTabId}  transactionType={eachType}/>
-                        ))}
-                    </ul>
-                    <div className="transactions-container">
-                        {this.onRenderTransactions()}
-                    </div>
+    return(
+        <div className="main-container">
+            <SideBar/>
+            <div>
+                <div className="heading-container">
+                <h1 className="accounts-heading">Transactions</h1>
+                <AddTransaction/>
+                </div>
+                <ul className="transactions-types">
+                    {transactionsTypes.map(eachType => (
+                        <EachType key={eachType.id} setActiveTabId={setActiveTabId} isActive={eachType.id === activeTabId}  transactionType={eachType}/>
+                    ))}
+                </ul>
+                <div className="transactions-container">
+                    {onRenderTransactions()}
                 </div>
             </div>
-        )
-    }
+        </div>
+    )
 }
 
 export default Transactions

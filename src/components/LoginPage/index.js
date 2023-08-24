@@ -1,32 +1,31 @@
-import {Component} from 'react'
-
-import {Redirect} from 'react-router-dom'
+import {Redirect, useHistory} from 'react-router-dom'
+import { useState } from 'react'
 import Cookies from 'js-cookie'
 
 import './index.css'
 
-class LoginPage extends Component {
-  state = {
-    email: '',
-    password: '',
-    showErrorMsg: false,
-    errorMsg: '',
-  }
+const LoginPage = () => {
+  const history = useHistory()
+  const [email, changeEmail] = useState('')
+  const [password, changePassword] = useState('')
+  const [showErrorMsg, changeShowErrorMsg] = useState(false)
+  const [errorMsg, changeErrorMsg] = useState('')
 
-  onSubmitSuccess = userId => {
-    const {history} = this.props
+  const userId = Cookies.get('user_id')
+
+  const onSubmitSuccess = userId => {
     Cookies.set('user_id', userId, {expires: 30})
     history.replace('/')
   }
 
-  onSubmitFailure = errorMsg => {
-    this.setState({showErrorMsg: true, errorMsg})
+  const onSubmitFailure = errorMsg => {
+    changeShowErrorMsg(true)
+    changeErrorMsg(errorMsg)
   }
 
-  onSubmitForm = async event => {
+  const onSubmitForm = async event => {
     event.preventDefault()
     const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
-    const {email, password} = this.state
     const userDetails = {
       email,
       password
@@ -43,70 +42,66 @@ class LoginPage extends Component {
     const response = await fetch(url, options)
     const data = await response.json()
     if (data.get_user_id.length > 0) {
-      this.onSubmitSuccess(data.get_user_id[0].id)
+      onSubmitSuccess(data.get_user_id[0].id)
     } else {
-      this.onSubmitFailure("wrong user details")
+      onSubmitFailure("wrong user details")
     }
   }
 
-  onChangeUsername = event => {
-    this.setState({email: event.target.value})
+  const onChangeEmail = event => {
+    changeEmail(event.target.value)
   }
 
-  onChangePassword = event => {
-    this.setState({password: event.target.value})
+  const onChangePassword = event => {
+    changePassword(event.target.value)
   }
 
-  render() {
-    const {email, password, showErrorMsg, errorMsg} = this.state
-    const userId = Cookies.get('user_id')
-    if (userId !== undefined) {
-      return <Redirect to="/" />
-    }
-    return (
-      <div className="login-container">
-        <div className="login-and-form-container">
-          <form className="form-container" onSubmit={this.onSubmitForm}>
-            <img
-              src="https://res.cloudinary.com/daflxmokq/image/upload/v1690619081/Group_hmc6ea.jpg"
-              alt="website logo"
-              className="logo"
+  if (userId !== undefined) {
+    return <Redirect to="/" />
+  }
+  return (
+    <div className="login-container">
+      <div className="login-and-form-container">
+        <form className="form-container" onSubmit={onSubmitForm}>
+          <img
+            src="https://res.cloudinary.com/daflxmokq/image/upload/v1690619081/Group_hmc6ea.jpg"
+            alt="website logo"
+            className="logo"
+          />
+          <h1 className="heading">Money Matters</h1>
+          <div className="input-container">
+            <label className="label" htmlFor="email">
+              EMAIL
+            </label>
+            <input
+              className="input"
+              type="text"
+              id="email"
+              placeholder="Email"
+              onChange={onChangeEmail}
+              value={email}
             />
-            <h1 className="heading">Money Matters</h1>
-            <div className="input-container">
-              <label className="label" htmlFor="email">
-                EMAIL
-              </label>
-              <input
-                className="input"
-                type="text"
-                id="email"
-                placeholder="Email"
-                onChange={this.onChangeUsername}
-                value={email}
-              />
-            </div>
-            <div className="input-container">
-              <label className="label" htmlFor="password">
-                PASSWORD
-              </label>
-              <input
-                className="input"
-                type="password"
-                id="password"
-                placeholder="Password"
-                onChange={this.onChangePassword}
-                value={password}
-              />
-            </div>
-            {showErrorMsg && <p className="error-msg">{errorMsg}</p>}
-            <button type="submit" className="login-button">
-              Login
-            </button>
-          </form>
-        </div>
+          </div>
+          <div className="input-container">
+            <label className="label" htmlFor="password">
+              PASSWORD
+            </label>
+            <input
+              className="input"
+              type="password"
+              id="password"
+              placeholder="Password"
+              onChange={onChangePassword}
+              value={password}
+            />
+          </div>
+          {showErrorMsg && <p className="error-msg">{errorMsg}</p>}
+          <button type="submit" className="login-button">
+            Login
+          </button>
+        </form>
       </div>
-    )
-  }
+    </div>
+  )
 }
 export default LoginPage

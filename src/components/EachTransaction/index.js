@@ -20,11 +20,17 @@ const EachTransaction = (props) => {
     minutes = minutes < 10 ? '0'+minutes : minutes;
     const dateTime = `${newDate.getDate()} ${monthNames[newDate.getMonth()]}, ${hours}.${minutes} ${ampm}`
 
+    let month = newDate.getMonth()
+    let resMonth = month > 9 ? month : `0${month}`
+    let day = newDate.getDay()
+    let resDay = day > 9 ? day : `0${day}`
+    let dateFormate = `${newDate.getFullYear()}-${resMonth}-${resDay}`
+
     const [transactionName, editTransactionName] = useState(transaction_name);
     const [transactionType, editTransactionType] = useState(type);
     const [transactionCategory, editCategory] = useState(category);
     const [transactionAmount, editAmount] = useState(amount);
-    const [transactiobDate, editDate] = useState(date);
+    const [transactiobDate, editDate] = useState(dateFormate);
     const [errorMsg, editErrorMsg] = useState(false)
     const [error, editError] = useState('')
 

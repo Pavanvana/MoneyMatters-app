@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import SideBar from "../SideBar";
 import AddTransaction from '../AddTransaction'
-import Cookies from 'js-cookie'
 import Loader from 'react-loader-spinner'
+import useCookieId from "../customHook/getUserId";
 import './index.css'
+import useFetch from "../customHook/useFetch";
 
 const apiStatusConstants = {
     initial: 'INITIAL',
@@ -12,33 +13,32 @@ const apiStatusConstants = {
     inProgress: 'IN_PROGRESS',
 }
 const Profile = () => {
-    const [profileDetails, changeProfileDetails] = useState('')
-    const [apiStatus, changeApiStatus] = useState(apiStatusConstants.initial)
+    const userId = useCookieId()
+    const [profileDetails, setProfileDetails] = useState('')
+
+    const url = 'https://bursting-gelding-24.hasura.app/api/rest/profile'
+    const options = {
+        method: 'GET',
+        headers: {
+            'content-type': 'application/json',
+            'x-hasura-admin-secret': 'g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF',
+            'x-hasura-role': 'user',
+            'x-hasura-user-id': userId
+        }
+    }
+    const {data, apiStatus, fetchData} = useFetch(url, options)
+
+    useEffect(() => {
+        fetchData()
+    }, [])
 
     useEffect(() => {
         fetchProfileData()
-    }, [])
+    }, [data, apiStatus, url, userId])
 
-    const fetchProfileData= async () => {
-        changeApiStatus(apiStatusConstants.inProgress)
-        const url = 'https://bursting-gelding-24.hasura.app/api/rest/profile'
-        const userId = Cookies.get('user_id')
-        const options = {
-            method: 'GET',
-            headers: {
-                'content-type': 'application/json',
-                'x-hasura-admin-secret': 'g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF',
-                'x-hasura-role': 'user',
-                'x-hasura-user-id': userId
-            }
-        }
-        const response = await fetch(url, options)
-        const data = await response.json()
-        if (response.ok) {
-            changeApiStatus(apiStatusConstants.success)
-            changeProfileDetails(data.users[0])
-        }else{
-            changeApiStatus(apiStatusConstants.failure)
+    const fetchProfileData= () => {
+        if (data.length === undefined) {
+            setProfileDetails(data.users[0])
         }
     }
 
@@ -123,7 +123,7 @@ const Profile = () => {
     
     return(
         <div className="main-container">
-            <SideBar/>
+            <SideBar activeTab="profile"/>
             <div>
                 <div className="heading-container">
                     <h1 className="accounts-heading">Profile</h1>

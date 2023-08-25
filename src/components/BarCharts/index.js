@@ -7,50 +7,49 @@ import {
   Legend,
 } from "recharts"
 import Loader from "react-loader-spinner"
-import Cookies from "js-cookie"
-
+import useCookieId from "../customHook/getUserId"
+import useFetch from "../customHook/useFetch"
 import './index.css'
+
 const apiStatusConstants = {
   initial: 'INITIAL',
   success: 'SUCCESS',
   failure: 'FAILURE',
   inProgress: 'IN_PROGRESS',
 }
+
+
 const BarCharts = () => {
-  const [apiStatus, changeApiStatus] = useState(apiStatusConstants.initial)
-  const [last7DaysCreditsAndDebitsDate, changeLast7DaysCreditsAndDebitsDate] = useState([])
-  
+  const userId = useCookieId()
+  const [last7DaysCreditsAndDebitsDate, setLast7DaysCreditsAndDebitsDate] = useState([])
+
+  const url = userId === '3' ? 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-last-7-days-admin' : 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-7-days' 
+  const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
+  const userOrAdmin = userId === '3' ? 'admin' : 'user'
+  const options = {
+    method: 'GET',
+    headers:{
+      "x-hasura-admin-secret": accesToken,
+      'Content-Type' : "application/json",
+      'x-hasura-role': userOrAdmin,
+      'x-hasura-user-id': userId
+    }
+  }
+  const {data, apiStatus, fetchData} = useFetch(url, options)
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
   useEffect(() => {
     getLast7daysCreditsAndDebits()
-  }, [])
+  }, [userId, apiStatus, data])
   
   const getLast7daysCreditsAndDebits = async () => {
-    changeApiStatus(apiStatusConstants.inProgress)
-    const userId = Cookies.get('user_id')
-    const url = userId === '3' ? 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-last-7-days-admin' : 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-7-days' 
-    const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
-    const userOrAdmin = userId === '3' ? 'admin' : 'user'
-    const options = {
-      method: 'GET',
-      headers:{
-        "x-hasura-admin-secret": accesToken,
-        'Content-Type' : "application/json",
-        'x-hasura-role': userOrAdmin,
-        'x-hasura-user-id': userId
-      }
-    }
-    const response = await fetch(url, options)
-    const data = await response.json()
-    if (response.ok){
-      if (userId === '3'){
-        changeApiStatus(apiStatusConstants.success)
-        changeLast7DaysCreditsAndDebitsDate(data.last_7_days_transactions_totals_admin)
-      }else{
-        changeApiStatus(apiStatusConstants.success)
-        changeLast7DaysCreditsAndDebitsDate(data.last_7_days_transactions_credit_debit_totals)
-      }
+    if (userId === '3'){
+      setLast7DaysCreditsAndDebitsDate(data.last_7_days_transactions_totals_admin)
     }else{
-      changeApiStatus(apiStatusConstants.failure)
+      setLast7DaysCreditsAndDebitsDate(data.last_7_days_transactions_credit_debit_totals)
     }
   }
   const onClickReTry = () => {
@@ -92,9 +91,9 @@ const BarCharts = () => {
       let totalCreditSum = 0
       let totalDebitSum = 0
       for (let i = 0; i < 7; i++){
-        const findDat = last7DaysCreditsAndDebitsDate.filter(each =>new Date(each.date).getDay() === i)
-        const credit = findDat.find(each => each.type === 'credit')
-        const debit = findDat.find(each => each.type === 'debit')
+        const findData = last7DaysCreditsAndDebitsDate !== undefined && last7DaysCreditsAndDebitsDate.filter(each =>new Date(each.date).getDay() === i)
+        const credit = last7DaysCreditsAndDebitsDate !== undefined && findData.find(each => each.type === 'credit')
+        const debit = last7DaysCreditsAndDebitsDate !== undefined && findData.find(each => each.type === 'debit')
         const creditSum = credit === undefined ? 0 : credit.sum
         const debitSum = debit === undefined ? 0 : debit.sum
         totalCreditSum += creditSum

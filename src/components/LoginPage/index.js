@@ -1,17 +1,51 @@
 import {Redirect, useHistory} from 'react-router-dom'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Cookies from 'js-cookie'
+import useCookieId from '../customHook/getUserId'
+import useFetch from '../customHook/useFetch'
 
 import './index.css'
 
 const LoginPage = () => {
   const history = useHistory()
-  const [email, changeEmail] = useState('')
-  const [password, changePassword] = useState('')
-  const [showErrorMsg, changeShowErrorMsg] = useState(false)
-  const [errorMsg, changeErrorMsg] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showErrorMsg, setShowErrorMsg] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+  const userId = useCookieId()
 
-  const userId = Cookies.get('user_id')
+  const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
+  const userDetails = {
+    email,
+    password
+  }
+  const url =  "https://bursting-gelding-24.hasura.app/api/rest/get-user-id"
+  const options = {
+    method: 'POST',
+    headers:{
+      "x-hasura-admin-secret": accesToken,
+      'Content-Type' : "application/json"
+    },
+    body: JSON.stringify(userDetails)
+  }
+  const {data, fetchData} = useFetch(url, options)
+
+  useEffect(() => {
+    if (data.get_user_id !== undefined ){
+      onfetchData()
+    }
+  }, [data])
+
+  const onfetchData = () => {
+    console.log("data", data)
+    if (data.get_user_id.length > 0){
+      onSubmitSuccess(data.get_user_id[0].id)
+      setShowErrorMsg(false)
+    }else{
+      setShowErrorMsg(true)
+      onSubmitFailure("*Invalid user details")
+    }
+  }
 
   const onSubmitSuccess = userId => {
     Cookies.set('user_id', userId, {expires: 30})
@@ -19,44 +53,24 @@ const LoginPage = () => {
   }
 
   const onSubmitFailure = errorMsg => {
-    changeShowErrorMsg(true)
-    changeErrorMsg(errorMsg)
+    setShowErrorMsg(true)
+    setErrorMsg(errorMsg)
   }
 
-  const onSubmitForm = async event => {
+  const onSubmitForm = event => {
     event.preventDefault()
-    const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
-    const userDetails = {
-      email,
-      password
-    }
-    const url =  `https://bursting-gelding-24.hasura.app/api/rest/get-user-id?email=${email}&password=${password}`
-    const options = {
-      method: 'POST',
-      headers:{
-        "x-hasura-admin-secret": accesToken,
-        'Content-Type' : "application/json"
-      },
-      body: JSON.stringify(userDetails)
-    }
-    const response = await fetch(url, options)
-    const data = await response.json()
-    if (data.get_user_id.length > 0) {
-      onSubmitSuccess(data.get_user_id[0].id)
-    } else {
-      onSubmitFailure("wrong user details")
-    }
+    fetchData()
   }
 
   const onChangeEmail = event => {
-    changeEmail(event.target.value)
+    setEmail(event.target.value)
   }
 
   const onChangePassword = event => {
-    changePassword(event.target.value)
+    setPassword(event.target.value)
   }
 
-  if (userId !== undefined) {
+  if (userId !== undefined){
     return <Redirect to="/" />
   }
   return (

@@ -4,8 +4,11 @@ import AddTransaction from '../AddTransaction'
 import SideBar from "../SideBar"
 import BarCharts from '../BarCharts'
 import Loader from 'react-loader-spinner'
-import Cookies from 'js-cookie'
 import EachTransaction from "../EachTransaction";
+
+import useCookieId from '../customHook/getUserId'
+import useFetch from "../customHook/useFetch";
+
 
 import './index.css'
 
@@ -17,38 +20,79 @@ const apiStatusConstants = {
 }
 
 const Home = () => {
-    const [creditSum, changeCreditSum] = useState('')
-    const [debitSum, changeDebitSum] = useState('')
-    const [apiStatus, changeApiStatus] = useState(apiStatusConstants.initial)
-    const [recentThreeTrensactionList, changeRecentThreeTrensactionList] = useState([])
+    const userId = useCookieId()
+    const [creditSum, setCreditSum] = useState('')
+    const [debitSum, setDebitSum] = useState('')
+    const [recentThreeTrensactionList, setRecentThreeTrensactionList] = useState([])
+
+    const urlOfRecentThreeTr = " https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=3&offset=0"
+    const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
+    const userOrAdmin = userId === '3' ? "admin" : "user"
+    const options = {
+      method: 'GET',
+      headers:{
+        "x-hasura-admin-secret": accesToken,
+        'Content-Type' : "application/json",
+        'x-hasura-role': userOrAdmin,
+        'x-hasura-user-id': userId
+      }
+    }
+    const {data, apiStatus, fetchData} = useFetch(urlOfRecentThreeTr, options)
+    const urlOfCreditsAndDebits = userId === '3' ? "https://bursting-gelding-24.hasura.app/api/rest/transaction-totals-admin" : "https://bursting-gelding-24.hasura.app/api/rest/credit-debit-totals"
+    const {data: creditsAndDebitsData, fetchData: fetchDataCreditsAndDebits} = useFetch(urlOfCreditsAndDebits, options)
+
+    useEffect(() => {
+      fetchData()
+      fetchDataCreditsAndDebits()
+    }, [])
 
     useEffect(() => {
         getCreditAndDebitSum()
         getRecentThreeTransactions()
-    }, [])
+    }, [userId, apiStatus, data, creditsAndDebitsData])
 
-    const getRecentThreeTransactions = async () => {
-      changeApiStatus(apiStatusConstants.inProgress)
-      const url = " https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=3&offset=0"
-      const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
-      const userId = Cookies.get('user_id')
-      const options = {
-        method: 'GET',
-        headers:{
-          "x-hasura-admin-secret": accesToken,
-          'Content-Type' : "application/json",
-          'x-hasura-role': 'user',
-          'x-hasura-user-id': userId
+    const getRecentThreeTransactions = () => {
+      if (data.length === undefined){
+        setRecentThreeTrensactionList([...data.transactions])
+      }
+    }
+
+    const getCreditAndDebitSum = async () => {
+      let creditSumData;
+      let debitSumData;
+      if (creditsAndDebitsData.length === undefined){
+        if (userId === '3'){
+          creditSumData = creditsAndDebitsData.transaction_totals_admin.find(each => each.type === 'credit')
+          debitSumData = creditsAndDebitsData.transaction_totals_admin.find(each => each.type === 'debit')
+        }else{
+            creditSumData = creditsAndDebitsData.totals_credit_debit_transactions.find(each => each.type === 'credit')
+            debitSumData = creditsAndDebitsData.totals_credit_debit_transactions.find(each => each.type === 'debit')
         }
+        let creditData = creditSumData === undefined ? 0 : creditSumData.sum 
+        let debitData = debitSumData === undefined ? 0 : debitSumData.sum
+        setCreditSum(creditData)
+        setDebitSum(debitData)
+        }
+    }
+
+    const deleteTransaction = async (id) => {
+      const url = " https://bursting-gelding-24.hasura.app/api/rest/delete-transaction";
+      const deleteTransactionId = {
+          id
       }
-      const response = await fetch(url, options)
-      const data = await response.json()
-      if (response.ok){
-        changeRecentThreeTrensactionList([...data.transactions])
-        changeApiStatus(apiStatusConstants.success)
-      }else{
-        changeApiStatus(apiStatusConstants.failure)
+      const options={
+          method: 'DELETE',
+          headers: {
+            'content-type': 'application/json',
+            'x-hasura-admin-secret': 'g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF',
+            'x-hasura-role': 'user',
+            'x-hasura-user-id': userId
+          },
+          body: JSON.stringify(deleteTransactionId)
       }
+      await fetch(url, options)
+      alert('Transaction Deleted')
+      window.location.reload(false)
     }
 
     const renderSuccessView = () => {
@@ -102,63 +146,9 @@ const Home = () => {
         }
     }
 
-    const getCreditAndDebitSum = async () => {
-      const userId = Cookies.get('user_id')
-      const url = userId === '3' ? "https://bursting-gelding-24.hasura.app/api/rest/transaction-totals-admin" : "https://bursting-gelding-24.hasura.app/api/rest/credit-debit-totals"
-      const userOrAdmin = userId === '3' ? "admin" : "user"
-      const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
-      const options = {
-        method: 'GET',
-        headers:{
-          "x-hasura-admin-secret": accesToken,
-          'Content-Type' : "application/json",
-          'x-hasura-role': userOrAdmin,
-          'x-hasura-user-id': userId
-        }
-      }
-      const response = await fetch(url, options)
-      const data = await response.json()
-      if (response.ok){
-        let creditSumData;
-        let debitSumData;
-        if (userId === '3'){
-           creditSumData = data.transaction_totals_admin.find(each => each.type === 'credit')
-           debitSumData = data.transaction_totals_admin.find(each => each.type === 'debit')
-        }else{
-           creditSumData = data.totals_credit_debit_transactions.find(each => each.type === 'credit')
-           debitSumData = data.totals_credit_debit_transactions.find(each => each.type === 'debit')
-        }
-        let creditData = creditSumData === undefined ? 0 : creditSumData.sum 
-        let debitData = debitSumData === undefined ? 0 : debitSumData.sum
-        changeCreditSum(creditData)
-        changeDebitSum(debitData)
-      }
-    }
-
-    const deleteTransaction = async (id) => {
-      const url = " https://bursting-gelding-24.hasura.app/api/rest/delete-transaction";
-      const userId = Cookies.get('user_id')
-      const deleteTransactionId = {
-          id
-      }
-      const options={
-          method: 'DELETE',
-          headers: {
-            'content-type': 'application/json',
-            'x-hasura-admin-secret': 'g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF',
-            'x-hasura-role': 'user',
-            'x-hasura-user-id': userId
-          },
-          body: JSON.stringify(deleteTransactionId)
-      }
-      await fetch(url, options)
-      alert('Transaction Deleted')
-      window.location.reload(false)
-    }
-
     return(
         <div className="main-container">
-            <SideBar/>
+            <SideBar activeTab="dashboard"/>
             <div className="home-container">
                 <div className="heading-container">
                     <h1 className="accounts-heading">Accounts</h1>

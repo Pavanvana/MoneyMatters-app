@@ -3,9 +3,10 @@ import SideBar from "../SideBar";
 import AddTransaction from '../AddTransaction'
 import EachType from "../EachType";
 import './index.css'
-import Cookies from 'js-cookie'
 import Loader from 'react-loader-spinner'
 import EachTransaction from "../EachTransaction";
+import useCookieId from "../customHook/getUserId";
+import useFetch from "../customHook/useFetch";
 
 const transactionsTypes = [
     {
@@ -31,38 +32,37 @@ const apiStatusConstants = {
 
 
 const Transactions = () => {
-    const [activeTabId, changeActiveTabId] = useState(transactionsTypes[0].id)
-    const [apiStatus, changeApiStatus] = useState(apiStatusConstants.initial)
-    const [transactionsList, changeTransactionList] = useState([])
+    const userId = useCookieId()
+    const [activeTabId, setActiveTabId] = useState(transactionsTypes[0].id)
+    const [transactionsList, setTransactionList] = useState([])
+
+    const url = "https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=1000&offset=1"
+    const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
+    const options = {
+        method: 'GET',
+        headers:{
+            "x-hasura-admin-secret": accesToken,
+            'Content-Type' : "application/json",
+            'x-hasura-role': 'user',
+            'x-hasura-user-id': userId
+        }
+    }
+    const {data, apiStatus, fetchData} = useFetch(url,options)
+
+    useEffect(() => {
+        fetchData()
+    }, [])
 
     useEffect(() => {
         getTransactionsData()
-    },[])
+    }, [apiStatus, data])
 
-    const getTransactionsData= async () => {
-        changeApiStatus( apiStatusConstants.inProgress )
-        const url = "https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=1000&offset=1"
-        const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
-        const userId = Cookies.get('user_id')
-        const options = {
-            method: 'GET',
-            headers:{
-              "x-hasura-admin-secret": accesToken,
-              'Content-Type' : "application/json",
-              'x-hasura-role': 'user',
-              'x-hasura-user-id': userId
-            }
-          }
-        const response = await fetch(url, options)
-        const data = await response.json()
-        if (response.ok){
-            changeApiStatus( apiStatusConstants.success )
-            changeTransactionList([...data.transactions])
-        }else{
-            changeApiStatus( apiStatusConstants.failure )
+    const getTransactionsData = () => {
+        if (data.length === undefined){
+            setTransactionList([...data.transactions])
         }
     }
-
+    
     const onClickReTry = () => {
         getTransactionsData()
     }
@@ -93,7 +93,6 @@ const Transactions = () => {
 
     const deleteTransaction = async (id) => {
         const url = " https://bursting-gelding-24.hasura.app/api/rest/delete-transaction";
-        const userId = Cookies.get('user_id')
         const deleteTransactionId = {
             id
         }
@@ -154,13 +153,13 @@ const Transactions = () => {
         }
     }
 
-    const setActiveTabId = tabId => {
-        changeActiveTabId(tabId)
+    const changeActiveTabId = tabId => {
+        setActiveTabId(tabId)
     }
 
     return(
         <div className="main-container">
-            <SideBar/>
+            <SideBar activeTab="transactions"/>
             <div>
                 <div className="heading-container">
                 <h1 className="accounts-heading">Transactions</h1>
@@ -168,7 +167,7 @@ const Transactions = () => {
                 </div>
                 <ul className="transactions-types">
                     {transactionsTypes.map(eachType => (
-                        <EachType key={eachType.id} setActiveTabId={setActiveTabId} isActive={eachType.id === activeTabId}  transactionType={eachType}/>
+                        <EachType key={eachType.id} setActiveTabId={changeActiveTabId} isActive={eachType.id === activeTabId}  transactionType={eachType}/>
                     ))}
                 </ul>
                 <div className="transactions-container">

@@ -1,6 +1,6 @@
 import Cookies from "js-cookie"
 
-const useCookieId = () => {
+const useUserId = () => {
     return Cookies.get("user_id")
 }
-export default useCookieId
+export default useUserId

@@ -7,14 +7,14 @@ import {LuLogOut} from 'react-icons/lu'
 import {GrFormClose} from 'react-icons/gr'
 import Popup from 'reactjs-popup'
 import Cookies from 'js-cookie'
-import useCookieId from "../customHook/getUserId"
+import useUserId from "../customHook/getUserId"
 
 import './index.css'
 import useFetch from "../customHook/useFetch"
 
 
 const SideBar = (props) => {
-    const userId = useCookieId()
+    const userId = useUserId()
     const {activeTab} = props
     const history = useHistory()
     const [profileDetails, setProfileDetails] = useState('')
@@ -50,7 +50,7 @@ const SideBar = (props) => {
         history.replace('/login')
     }
 
-    const TransactionsName = userId === '3' ? "All Transactions" : "Transactions"
+    const transactionsName = userId === '3' ? "All Transactions" : "Transactions"
     return(
         <div className="side-bar">
         <div>
@@ -77,7 +77,7 @@ const SideBar = (props) => {
                 <div className={activeTab === 'transactions' ? "active-name-icon-container" : "name-icon-container"}>
                     {activeTab === 'transactions' && <div className="active"></div>}
                     <RiMoneyDollarBoxFill className={activeTab === 'transactions' ? "active-icon" : "icon"}/>
-                    <p className={activeTab === 'transactions' ? "active-dashboard-name" : "dashboard-name"}>{TransactionsName}</p>
+                    <p className={activeTab === 'transactions' ? "active-dashboard-name" : "dashboard-name"}>{transactionsName}</p>
                 </div>
             </Link>
             </li>

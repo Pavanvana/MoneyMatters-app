@@ -3,11 +3,11 @@ import {BiPlus} from 'react-icons/bi'
 import {GrFormClose} from 'react-icons/gr'
 import {Popup} from 'reactjs-popup'
 import { useState } from 'react'
-import useCookieId from '../customHook/getUserId'
+import useUserId from '../customHook/getUserId'
 import useFetch from '../customHook/useFetch'
 
 const AddTransaction = () => {
-  const userId = useCookieId()
+    const userId = useUserId()
     const [transactionName, setTransactionName] = useState('');
     const [transactionType, setTransactionType] = useState('');
     const [category, setCategory] = useState('');
@@ -16,13 +16,12 @@ const AddTransaction = () => {
     const [errorMsg, setErrorMsg] = useState(false)
     const [error, setError] = useState('')
 
-    const parseAmount = parseInt(amount)
     const url = "https://bursting-gelding-24.hasura.app/api/rest/add-transaction"
     const transactionDetails = {
       "name": transactionName,
       "type": transactionType,
       "category": category,
-      "amount": parseAmount,
+      "amount": amount,
       "date": new Date(date),
       "user_id": userId
     }
@@ -49,7 +48,7 @@ const AddTransaction = () => {
       setCategory(event.target.value)
     }
     const onChangeAmount = (event) => {
-      setAmount(event.target.value)
+      setAmount(parseInt(event.target.value))
     }
     const onChangeDate = (event) => {
       setDate(event.target.value)

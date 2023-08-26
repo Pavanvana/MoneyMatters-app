@@ -7,7 +7,7 @@ import {
   Legend,
 } from "recharts"
 import Loader from "react-loader-spinner"
-import useCookieId from "../customHook/getUserId"
+import useUserId from "../customHook/getUserId"
 import useFetch from "../customHook/useFetch"
 import './index.css'
 
@@ -20,7 +20,7 @@ const apiStatusConstants = {
 
 
 const BarCharts = () => {
-  const userId = useCookieId()
+  const userId = useUserId()
   const [last7DaysCreditsAndDebitsDate, setLast7DaysCreditsAndDebitsDate] = useState([])
 
   const url = userId === '3' ? 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-last-7-days-admin' : 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-7-days' 
@@ -52,7 +52,7 @@ const BarCharts = () => {
       setLast7DaysCreditsAndDebitsDate(data.last_7_days_transactions_credit_debit_totals)
     }
   }
-  const onClickReTry = () => {
+  const onClickRetry = () => {
     getLast7daysCreditsAndDebits()
   }
   
@@ -67,7 +67,7 @@ const BarCharts = () => {
           <button
           className="tryagain-btn"
           type="button"
-          onClick={onClickReTry}
+          onClick={onClickRetry}
           >
           Try again
           </button>
@@ -80,7 +80,7 @@ const BarCharts = () => {
       </div>
   )
   const renderBarchart = () => {
-      const DataFormatter = (number) => {
+      const dataFormatter = (number) => {
         if (number > 1000) {
           return `${(number / 1000).toString()}k`
         }
@@ -137,7 +137,7 @@ const BarCharts = () => {
                 }}
               />
               <YAxis
-                tickFormatter={DataFormatter}
+                tickFormatter={dataFormatter}
                 tick={{
                   stroke: '#718EBF',
                   strokeWidth: 1,
@@ -158,7 +158,7 @@ const BarCharts = () => {
       </>
     )
   }
-  const onRenderBarChart = () => {
+  const renderOnApiStatus = () => {
     switch (apiStatus) {
       case apiStatusConstants.success:
           return renderBarchart()
@@ -174,7 +174,7 @@ const BarCharts = () => {
     
   return(
       <div className="debit-credit-overview-container">
-        {onRenderBarChart()}
+        {renderOnApiStatus()}
       </div>
   )
     

@@ -6,7 +6,7 @@ import BarCharts from '../BarCharts'
 import Loader from 'react-loader-spinner'
 import EachTransaction from "../EachTransaction";
 
-import useCookieId from '../customHook/getUserId'
+import useUserId from '../customHook/getUserId'
 import useFetch from "../customHook/useFetch";
 
 
@@ -20,7 +20,7 @@ const apiStatusConstants = {
 }
 
 const Home = () => {
-    const userId = useCookieId()
+    const userId = useUserId()
     const [creditSum, setCreditSum] = useState('')
     const [debitSum, setDebitSum] = useState('')
     const [recentThreeTrensactionList, setRecentThreeTrensactionList] = useState([])
@@ -105,7 +105,7 @@ const Home = () => {
       )
     }
 
-    const onClickReTry = () => {
+    const onClickRetry = () => {
       this.getRecentThreeTransactions()
     }
     
@@ -120,7 +120,7 @@ const Home = () => {
             <button
             className="tryagain-btn"
             type="button"
-            onClick={onClickReTry}
+            onClick={onClickRetry}
             >
             Try again
             </button>
@@ -133,7 +133,7 @@ const Home = () => {
         </div>
     )
 
-    const onRenderLastThreeTrs = () => {
+    const renderOnApiStatus = () => {
       switch (apiStatus) {
         case apiStatusConstants.success:
             return renderSuccessView()
@@ -172,7 +172,7 @@ const Home = () => {
                         </div>
                     </div>
                       <h2 className="last-transaction-heading">Last Transaction</h2>
-                        {onRenderLastThreeTrs()}
+                        {renderOnApiStatus()}
                       <h2 className="debit-credit-overview-name">Debit & Credit Overview</h2>
                       <BarCharts/>
                 </div>

@@ -1,7 +1,7 @@
 import {Redirect, useHistory} from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import Cookies from 'js-cookie'
-import useCookieId from '../customHook/getUserId'
+import useUserId from '../customHook/getUserId'
 import useFetch from '../customHook/useFetch'
 
 import './index.css'
@@ -12,7 +12,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('')
   const [showErrorMsg, setShowErrorMsg] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
-  const userId = useCookieId()
+  const userId = useUserId()
 
   const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
   const userDetails = {
@@ -32,11 +32,11 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (data.get_user_id !== undefined ){
-      onfetchData()
+      getData()
     }
   }, [data])
 
-  const onfetchData = () => {
+  const getData = () => {
     console.log("data", data)
     if (data.get_user_id.length > 0){
       onSubmitSuccess(data.get_user_id[0].id)

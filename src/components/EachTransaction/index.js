@@ -1,13 +1,13 @@
 import './index.css'
 import {Popup} from 'reactjs-popup'
 import {GrFormClose} from 'react-icons/gr'
-import useCookieId from '../customHook/getUserId'
+import useUserId from '../customHook/getUserId'
 import { useState } from 'react'
 import { format } from 'date-fns'
 import useFetch from '../customHook/useFetch'
 
 const EachTransaction = (props) => {
-    const userId = useCookieId()
+    const userId = useUserId()
     const {transactionDetails, deleteTransaction} = props 
     const {id,transaction_name, type, category, amount, date} = transactionDetails
     const amountType = type === 'credit' ? '+$' : '-$' 

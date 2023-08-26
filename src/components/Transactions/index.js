@@ -5,7 +5,7 @@ import EachType from "../EachType";
 import './index.css'
 import Loader from 'react-loader-spinner'
 import EachTransaction from "../EachTransaction";
-import useCookieId from "../customHook/getUserId";
+import useUserId from "../customHook/getUserId";
 import useFetch from "../customHook/useFetch";
 
 const transactionsTypes = [
@@ -32,7 +32,7 @@ const apiStatusConstants = {
 
 
 const Transactions = () => {
-    const userId = useCookieId()
+    const userId = useUserId()
     const [activeTabId, setActiveTabId] = useState(transactionsTypes[0].id)
     const [transactionsList, setTransactionList] = useState([])
 
@@ -63,7 +63,7 @@ const Transactions = () => {
         }
     }
     
-    const onClickReTry = () => {
+    const onClickRetry = () => {
         getTransactionsData()
     }
     
@@ -78,7 +78,7 @@ const Transactions = () => {
             <button
             className="tryagain-btn"
             type="button"
-            onClick={onClickReTry}
+            onClick={onClickRetry}
             >
             Try again
             </button>
@@ -139,7 +139,7 @@ const Transactions = () => {
         )
     }
 
-    const onRenderTransactions = () => {
+    const renderOnApiStatus = () => {
 
         switch (apiStatus) {
         case apiStatusConstants.success:
@@ -171,7 +171,7 @@ const Transactions = () => {
                     ))}
                 </ul>
                 <div className="transactions-container">
-                    {onRenderTransactions()}
+                    {renderOnApiStatus()}
                 </div>
             </div>
         </div>

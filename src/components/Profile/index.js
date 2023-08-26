@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import SideBar from "../SideBar";
 import AddTransaction from '../AddTransaction'
 import Loader from 'react-loader-spinner'
-import useCookieId from "../customHook/getUserId";
+import useUserId from "../customHook/getUserId";
 import './index.css'
 import useFetch from "../customHook/useFetch";
 
@@ -13,7 +13,7 @@ const apiStatusConstants = {
     inProgress: 'IN_PROGRESS',
 }
 const Profile = () => {
-    const userId = useCookieId()
+    const userId = useUserId()
     const [profileDetails, setProfileDetails] = useState('')
 
     const url = 'https://bursting-gelding-24.hasura.app/api/rest/profile'
@@ -42,7 +42,7 @@ const Profile = () => {
         }
     }
 
-    const onClickReTry = () => {
+    const onClickRetry = () => {
         fetchProfileData()
     }
     
@@ -57,7 +57,7 @@ const Profile = () => {
             <button
             className="tryagain-btn"
             type="button"
-            onClick={onClickReTry}
+            onClick={onClickRetry}
             >
             Try again
             </button>
@@ -108,7 +108,7 @@ const Profile = () => {
         )
     }
 
-    const onRenderProfile = () => {
+    const renderOnApiStatus = () => {
         switch (apiStatus) {
             case apiStatusConstants.success:
                 return renderSuccessView()
@@ -130,7 +130,7 @@ const Profile = () => {
                     <AddTransaction/>
                 </div>
                 <div className="profile-container">
-                    {onRenderProfile()}
+                    {renderOnApiStatus()}
                 </div>
             </div>
         </div>

@@ -22,7 +22,6 @@ const transactionsTypes = [
         type: "Debit"
     }
 ]
-
 const apiStatusConstants = {
     initial: 'INITIAL',
     success: 'SUCCESS',
@@ -30,11 +29,16 @@ const apiStatusConstants = {
     inProgress: 'IN_PROGRESS',
 }
 
+interface Response {
+    transactions: Array<T>
+}
+
+type T = /*unresolved*/ any
 
 const Transactions = () => {
     const userId = useUserId()
     const [activeTabId, setActiveTabId] = useState(transactionsTypes[0].id)
-    const [transactionsList, setTransactionList] = useState([])
+    const [transactionsList, setTransactionList] = useState<Array<T>>([])
 
     const url = "https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=1000&offset=1"
     const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
@@ -58,8 +62,10 @@ const Transactions = () => {
     }, [apiStatus, data])
 
     const getTransactionsData = () => {
-        if (data.length === undefined){
-            setTransactionList([...data.transactions])
+        const response = data as Response|undefined
+        if (response !== undefined){
+            const transactionsList = response.transactions.sort((a, b) => new Date(a.date) < new Date(b.date) ? 1 : -1)
+            setTransactionList([...transactionsList])
         }
     }
     
@@ -86,17 +92,17 @@ const Transactions = () => {
     )
 
     const renderLoadingView = () => (
-        <div className="loader-container" testid="loader">
+        <div className="loader-container">
           <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
         </div>
     )
 
-    const deleteTransaction = async (id) => {
+    const deleteTransaction = async (id: number) => {
         const url = " https://bursting-gelding-24.hasura.app/api/rest/delete-transaction";
         const deleteTransactionId = {
             id
         }
-        const options={
+        const options: object={
             method: 'DELETE',
             headers: {
               'content-type': 'application/json',
@@ -108,7 +114,7 @@ const Transactions = () => {
         }
         await fetch(url, options)
         alert('Transaction Deleted')
-        window.location.reload(false)
+        window.location.reload()
     }
 
     const renderSuccessView = () => {
@@ -153,7 +159,7 @@ const Transactions = () => {
         }
     }
 
-    const changeActiveTabId = tabId => {
+    const changeActiveTabId = (tabId: number) => {
         setActiveTabId(tabId)
     }
 

@@ -13,7 +13,7 @@ import './App.css'
 const App = () => {
   return(
     <Switch>
-      <Route  exact path="/login" component={LoginPage} />
+      <Route exact path="/login" component={LoginPage} />
       <ProtectedRoute exact path="/" component={Home} />
       <ProtectedRoute exact path="/transactions" component={Transactions}/>
       <ProtectedRoute exact path="/profile" component={Profile}/>

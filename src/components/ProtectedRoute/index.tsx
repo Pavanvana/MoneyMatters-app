@@ -2,10 +2,16 @@ import {Route, Redirect} from 'react-router-dom'
 
 import useUserId from '../customHook/getUserId'
 
-const ProtectedRoute = props => {
+interface Props{
+  component: React.ComponentType<any> | any;
+  exact: boolean
+  path: string
+}
+
+const ProtectedRoute = (props: Props) => {
   const userId = useUserId()
   if (userId === undefined) {
-    return <Redirect to="/login" />
+    return <Redirect to ="/login"/>
   }
   return <Route {...props} />
 }

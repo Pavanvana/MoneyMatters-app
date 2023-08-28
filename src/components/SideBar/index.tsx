@@ -12,12 +12,24 @@ import useUserId from "../customHook/getUserId"
 import './index.css'
 import useFetch from "../customHook/useFetch"
 
+interface User {
+    name: string;
+    email: string;
+}
 
-const SideBar = (props) => {
+interface Users{
+    users: User[]
+}
+
+interface Props{
+    activeTab: string
+}
+
+const SideBar = (props: Props) => {
     const userId = useUserId()
     const {activeTab} = props
     const history = useHistory()
-    const [profileDetails, setProfileDetails] = useState('')
+    const [profileDetails, setProfileDetails] = useState<User>()
 
     const url = 'https://bursting-gelding-24.hasura.app/api/rest/profile'
     const options = {
@@ -40,9 +52,10 @@ const SideBar = (props) => {
     }, [userId, data])
     
     const fetchProfileDetails= async () => {
-        if (data.users !== undefined){
-            setProfileDetails(data.users[0])
-        }
+        const profile = data as Users|undefined
+        if (profile !== undefined){
+            setProfileDetails(profile.users[0])
+        } 
     }
 
     const onClickLogout = () => {
@@ -97,8 +110,8 @@ const SideBar = (props) => {
             <div className="profile">
                 <img className="sidebar-profile" src="https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60" alt="profile-icon"/>
                 <div>
-                    <p className="user-name">{profileDetails.name}</p>
-                    <p className="user-email">{profileDetails.email}</p>
+                    <p className="user-name">{profileDetails?.name}</p>
+                    <p className="user-email">{profileDetails?.email}</p>
                 </div>
             </div>
             </Link>
@@ -111,42 +124,41 @@ const SideBar = (props) => {
                 }
                 className="popup-content"
                 position="right center"
+                closeOnEscape
                 >
-                {close => (
-                    <div className="model">
-                    <div className="overlay">
-                        <div className="modal-container">
-                            <div className="close-button-container">
-                            <button
-                                className="close-btn"
-                                type="button"
-                                onClick={() => close()}
-                            >
-                                <GrFormClose size="20" />
-                            </button>
-                            </div>
-                            <div className="logout-description-icon-con">
-                                <div className="logout-icon-container-1">
-                                    <div className="logout-icon-container-2">
-                                        <LuLogOut className="logout-icon"/>
-                                    </div>
+                <div className="model">
+                <div className="overlay">
+                    <div className="modal-container">
+                        <div className="close-button-container">
+                        <button
+                            className="close-btn"
+                            type="button"
+                            
+                        >
+                            <GrFormClose size="20" />
+                        </button>
+                        </div>
+                        <div className="logout-description-icon-con">
+                            <div className="logout-icon-container-1">
+                                <div className="logout-icon-container-2">
+                                    <LuLogOut className="logout-icon"/>
                                 </div>
-                                <div>
-                                    <h3 className="logout-pop-heading">Are you sure you want to Logout?</h3>
-                                    <p className="logout-pop-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed </p>
-                                    <div className="logout-btns-con">
-                                        <button type="button" className="yes-logout-btn" onClick={onClickLogout}>Yes, Logout</button>
-                                        <button type="button" className="cancel-logout-btn" onClick={() => close()}>Cancel</button>
-                                    </div>
+                            </div>
+                            <div>
+                                <h3 className="logout-pop-heading">Are you sure you want to Logout?</h3>
+                                <p className="logout-pop-description">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed </p>
+                                <div className="logout-btns-con">
+                                    <button type="button" className="yes-logout-btn" onClick={onClickLogout}>Yes, Logout</button>
+                                    <button type="button" className="cancel-logout-btn">Cancel</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    </div>
-                )}
+                </div>
+                </div>
             </Popup>
         </div>               
-    </div>
+        </div>
     )
 
 }

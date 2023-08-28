@@ -1,6 +1,15 @@
 import './index.css'
 
-const EachType = (props) => {
+interface Props{
+    transactionType: {
+        id: number;
+        type: string;
+    }
+    setActiveTabId: Function 
+    isActive: boolean
+}
+
+const EachType = (props:Props) => {
     const {transactionType, setActiveTabId, isActive} = props 
     const {id, type} = transactionType
     const onClickType = () => {

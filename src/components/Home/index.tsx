@@ -19,11 +19,33 @@ const apiStatusConstants = {
     inProgress: 'IN_PROGRESS',
 }
 
+interface Response {
+  transactions: Array<T>
+}
+
+interface getCreditsAndDebits{
+  totals_credit_debit_transactions: [
+    {
+        type: string;
+        sum: number;
+    }
+  ],
+  transaction_totals_admin:[
+    {
+      type: string;
+      sum: number;
+    }
+  ]
+}
+
+type T = /*unresolved*/ any
+
+
 const Home = () => {
     const userId = useUserId()
-    const [creditSum, setCreditSum] = useState('')
-    const [debitSum, setDebitSum] = useState('')
-    const [recentThreeTrensactionList, setRecentThreeTrensactionList] = useState([])
+    const [creditSum, setCreditSum] = useState<number>(0)
+    const [debitSum, setDebitSum] = useState<number>(0)
+    const [recentThreeTrensactionList, setRecentThreeTrensactionList] = useState<Array<T>>([])
 
     const urlOfRecentThreeTr = " https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=3&offset=0"
     const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
@@ -39,7 +61,7 @@ const Home = () => {
     }
     const {data, apiStatus, fetchData} = useFetch(urlOfRecentThreeTr, options)
     const urlOfCreditsAndDebits = userId === '3' ? "https://bursting-gelding-24.hasura.app/api/rest/transaction-totals-admin" : "https://bursting-gelding-24.hasura.app/api/rest/credit-debit-totals"
-    const {data: creditsAndDebitsData, fetchData: fetchDataCreditsAndDebits} = useFetch(urlOfCreditsAndDebits, options)
+    const {data: creditsAndDebitsData , fetchData: fetchDataCreditsAndDebits} = useFetch(urlOfCreditsAndDebits, options)
 
     useEffect(() => {
       fetchData()
@@ -52,21 +74,24 @@ const Home = () => {
     }, [userId, apiStatus, data, creditsAndDebitsData])
 
     const getRecentThreeTransactions = () => {
-      if (data.length === undefined){
-        setRecentThreeTrensactionList([...data.transactions])
+      const response = data as Response|undefined
+      if (response !== undefined){
+        const recentThreeTransactions = response.transactions.sort((a, b) => new Date(a.date) < new Date(b.date) ? 1 : -1)
+        setRecentThreeTrensactionList([...recentThreeTransactions])
       }
     }
 
     const getCreditAndDebitSum = async () => {
       let creditSumData;
       let debitSumData;
-      if (creditsAndDebitsData.length === undefined){
+      const creditsDebitsSum = creditsAndDebitsData as getCreditsAndDebits|undefined
+      if (creditsDebitsSum !== undefined){
         if (userId === '3'){
-          creditSumData = creditsAndDebitsData.transaction_totals_admin.find(each => each.type === 'credit')
-          debitSumData = creditsAndDebitsData.transaction_totals_admin.find(each => each.type === 'debit')
+          creditSumData = creditsDebitsSum.transaction_totals_admin.find(each => each.type === 'credit')
+          debitSumData = creditsDebitsSum.transaction_totals_admin.find(each => each.type === 'debit')
         }else{
-            creditSumData = creditsAndDebitsData.totals_credit_debit_transactions.find(each => each.type === 'credit')
-            debitSumData = creditsAndDebitsData.totals_credit_debit_transactions.find(each => each.type === 'debit')
+            creditSumData = creditsDebitsSum.totals_credit_debit_transactions.find(each => each.type === 'credit')
+            debitSumData = creditsDebitsSum.totals_credit_debit_transactions.find(each => each.type === 'debit')
         }
         let creditData = creditSumData === undefined ? 0 : creditSumData.sum 
         let debitData = debitSumData === undefined ? 0 : debitSumData.sum
@@ -75,12 +100,12 @@ const Home = () => {
         }
     }
 
-    const deleteTransaction = async (id) => {
+    const deleteTransaction = async (id: number) => {
       const url = " https://bursting-gelding-24.hasura.app/api/rest/delete-transaction";
       const deleteTransactionId = {
           id
       }
-      const options={
+      const options: object ={
           method: 'DELETE',
           headers: {
             'content-type': 'application/json',
@@ -92,7 +117,7 @@ const Home = () => {
       }
       await fetch(url, options)
       alert('Transaction Deleted')
-      window.location.reload(false)
+      window.location.reload()
     }
 
     const renderSuccessView = () => {
@@ -106,7 +131,7 @@ const Home = () => {
     }
 
     const onClickRetry = () => {
-      this.getRecentThreeTransactions()
+      getRecentThreeTransactions()
     }
     
     const renderFailureView = () => (
@@ -128,7 +153,7 @@ const Home = () => {
     )
 
     const renderLoadingView = () => (
-        <div className="loader-container" testid="loader">
+        <div className="loader-container">
           <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
         </div>
     )

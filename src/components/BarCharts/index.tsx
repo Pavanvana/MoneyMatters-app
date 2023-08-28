@@ -18,10 +18,16 @@ const apiStatusConstants = {
   inProgress: 'IN_PROGRESS',
 }
 
+interface Response {
+  last_7_days_transactions_credit_debit_totals: Array<T>
+  last_7_days_transactions_totals_admin: Array<T>
+}
+
+type T = /*unresolved*/ any
 
 const BarCharts = () => {
   const userId = useUserId()
-  const [last7DaysCreditsAndDebitsDate, setLast7DaysCreditsAndDebitsDate] = useState([])
+  const [last7DaysCreditsAndDebitsDate, setLast7DaysCreditsAndDebitsDate] = useState<Array<T>>([])
 
   const url = userId === '3' ? 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-last-7-days-admin' : 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-7-days' 
   const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
@@ -46,10 +52,13 @@ const BarCharts = () => {
   }, [userId, apiStatus, data])
   
   const getLast7daysCreditsAndDebits = async () => {
-    if (userId === '3'){
-      setLast7DaysCreditsAndDebitsDate(data.last_7_days_transactions_totals_admin)
-    }else{
-      setLast7DaysCreditsAndDebitsDate(data.last_7_days_transactions_credit_debit_totals)
+    const dataOf7Days = data as Response|undefined
+    if (dataOf7Days !== undefined){
+      if (userId === '3'){
+        setLast7DaysCreditsAndDebitsDate(dataOf7Days.last_7_days_transactions_totals_admin)
+      }else{
+        setLast7DaysCreditsAndDebitsDate(dataOf7Days.last_7_days_transactions_credit_debit_totals)
+      }
     }
   }
   const onClickRetry = () => {
@@ -75,12 +84,12 @@ const BarCharts = () => {
   )
 
   const renderLoadingView = () => (
-      <div className="loader-container" testid="loader">
+      <div className="loader-container">
         <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
       </div>
   )
   const renderBarchart = () => {
-      const dataFormatter = (number) => {
+      const dataFormatter = (number: number) => {
         if (number > 1000) {
           return `${(number / 1000).toString()}k`
         }
@@ -91,9 +100,9 @@ const BarCharts = () => {
       let totalCreditSum = 0
       let totalDebitSum = 0
       for (let i = 0; i < 7; i++){
-        const findData = last7DaysCreditsAndDebitsDate !== undefined && last7DaysCreditsAndDebitsDate.filter(each =>new Date(each.date).getDay() === i)
-        const credit = last7DaysCreditsAndDebitsDate !== undefined && findData.find(each => each.type === 'credit')
-        const debit = last7DaysCreditsAndDebitsDate !== undefined && findData.find(each => each.type === 'debit')
+        const findData: any = last7DaysCreditsAndDebitsDate !== undefined && last7DaysCreditsAndDebitsDate.filter(each =>new Date(each.date).getDay() === i)
+        const credit = findData.find((each:any) => each.type === 'credit')
+        const debit = findData.find((each:any)=> each.type === 'debit')
         const creditSum = credit === undefined ? 0 : credit.sum
         const debitSum = debit === undefined ? 0 : debit.sum
         totalCreditSum += creditSum
@@ -119,7 +128,7 @@ const BarCharts = () => {
                         <p className="type">Debit</p>
                     </div>
                 </div>
-            </div>
+      </div>
       <BarChart
               width={1000}
               height={400}
@@ -152,8 +161,8 @@ const BarCharts = () => {
                   fontFamily: 'Roboto',
                 }}
               />
-              <Bar dataKey="credit" name="Credit" fill="#4C78FF" barSize="20%" radius={[10, 10, 10, 10]}/>
-              <Bar dataKey="debit" name="Debit" fill="#FCAA0B" barSize="20%" radius={[10, 10, 10, 10]}/>
+              <Bar dataKey="credit" name="Credit" fill="#4C78FF"  radius={[10, 10, 10, 10]}/>
+              <Bar dataKey="debit" name="Debit" fill="#FCAA0B"  radius={[10, 10, 10, 10]}/>
       </BarChart>
       </>
     )

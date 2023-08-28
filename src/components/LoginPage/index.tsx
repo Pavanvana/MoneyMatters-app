@@ -6,6 +6,14 @@ import useFetch from '../customHook/useFetch'
 
 import './index.css'
 
+interface Response {
+  get_user_id: [
+      {
+          id: number
+      }
+  ]
+}
+
 const LoginPage = () => {
   const history = useHistory()
   const [email, setEmail] = useState('')
@@ -31,15 +39,15 @@ const LoginPage = () => {
   const {data, fetchData} = useFetch(url, options)
 
   useEffect(() => {
-    if (data.get_user_id !== undefined ){
+    if (data !== undefined ){
       getData()
     }
   }, [data])
 
   const getData = () => {
-    console.log("data", data)
-    if (data.get_user_id.length > 0){
-      onSubmitSuccess(data.get_user_id[0].id)
+    const response = data as Response|undefined
+    if (response&& response.get_user_id.length > 0){
+      onSubmitSuccess(response.get_user_id[0].id)
       setShowErrorMsg(false)
     }else{
       setShowErrorMsg(true)
@@ -47,27 +55,19 @@ const LoginPage = () => {
     }
   }
 
-  const onSubmitSuccess = userId => {
-    Cookies.set('user_id', userId, {expires: 30})
+  const onSubmitSuccess = (userId:number) => {
+    Cookies.set('user_id', userId.toString(), {expires: 30})
     history.replace('/')
   }
 
-  const onSubmitFailure = errorMsg => {
+  const onSubmitFailure = (errorMsg: string) => {
     setShowErrorMsg(true)
     setErrorMsg(errorMsg)
   }
 
-  const onSubmitForm = event => {
-    event.preventDefault()
+  const onSubmitForm = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
     fetchData()
-  }
-
-  const onChangeEmail = event => {
-    setEmail(event.target.value)
-  }
-
-  const onChangePassword = event => {
-    setPassword(event.target.value)
   }
 
   if (userId !== undefined){
@@ -76,7 +76,7 @@ const LoginPage = () => {
   return (
     <div className="login-container">
       <div className="login-and-form-container">
-        <form className="form-container" onSubmit={onSubmitForm}>
+        <form className="form-container" onSubmit={(e) => onSubmitForm(e)}>
           <img
             src="https://res.cloudinary.com/daflxmokq/image/upload/v1690619081/Group_hmc6ea.jpg"
             alt="website logo"
@@ -92,7 +92,7 @@ const LoginPage = () => {
               type="text"
               id="email"
               placeholder="Email"
-              onChange={onChangeEmail}
+              onChange={(e) => setEmail(e.target.value)}
               value={email}
             />
           </div>
@@ -105,7 +105,7 @@ const LoginPage = () => {
               type="password"
               id="password"
               placeholder="Password"
-              onChange={onChangePassword}
+              onChange={(e) => setPassword(e.target.value)}
               value={password}
             />
           </div>

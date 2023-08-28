@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
 const apiStatusConstants = {
     initial: 'INITIAL',
@@ -7,8 +7,8 @@ const apiStatusConstants = {
     inProgress: 'IN_PROGRESS',
 }
 
-const useFetch =  (url, options) => {
-    const [data, setData] = useState([])
+const useFetch =  (url: string, options: object) => {
+    const [data, setData] = useState<object|undefined>()
     const [apiStatus, setApiStatus] = useState(apiStatusConstants.initial)
     const fetchData = async () => {
         setApiStatus(apiStatusConstants.inProgress)
@@ -21,6 +21,6 @@ const useFetch =  (url, options) => {
             setApiStatus(apiStatusConstants.failure)
         }
     }
-    return {data, apiStatus, fetchData}
+    return {data , apiStatus, fetchData}
 }
 export default useFetch

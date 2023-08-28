@@ -12,9 +12,23 @@ const apiStatusConstants = {
     failure: 'FAILURE',
     inProgress: 'IN_PROGRESS',
 }
+
+interface User  {
+    name: string,
+    email: string,
+    date_of_birth: string,
+}
+
+interface Users{
+    users: User[]
+
+}
+
+type T = /*unresolved*/ any
+
 const Profile = () => {
     const userId = useUserId()
-    const [profileDetails, setProfileDetails] = useState('')
+    const [profileDetails, setProfileDetails] = useState<User>()
 
     const url = 'https://bursting-gelding-24.hasura.app/api/rest/profile'
     const options = {
@@ -37,9 +51,10 @@ const Profile = () => {
     }, [data, apiStatus, url, userId])
 
     const fetchProfileData= () => {
-        if (data.length === undefined) {
-            setProfileDetails(data.users[0])
-        }
+        const profile = data as Users|undefined
+        if (profile !== undefined){
+            setProfileDetails(profile.users[0])
+        } 
     }
 
     const onClickRetry = () => {
@@ -65,7 +80,7 @@ const Profile = () => {
     )
 
     const renderLoadingView = () => (
-        <div className="loader-container" testid="loader">
+        <div className="loader-container">
           <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
         </div>
     )
@@ -79,13 +94,13 @@ const Profile = () => {
                         <div className="c1">
                             <label className="profile-label">Your Name</label>
                             <div className="profile-input">
-                                <p>{profileDetails.name}</p>
+                                <p>{profileDetails?.name}</p>
                             </div>
                         </div>
                         <div className="c1">
                             <label className="profile-label">User Name</label>
                             <div className="profile-input">
-                                <p>{profileDetails.name + "@123"}</p>
+                                <p>{profileDetails?.name + "@123"}</p>
                             </div>
                         </div>
                     </div>
@@ -93,13 +108,13 @@ const Profile = () => {
                         <div className="c1">
                             <label className="profile-label">Email</label>
                             <div className="profile-input">
-                                <p>{profileDetails.email}</p>
+                                <p>{profileDetails?.email}</p>
                             </div>
                         </div>
                         <div className="c1">
                             <label className="profile-label">Date of Birth</label>
                             <div className="profile-input">
-                                <p>{profileDetails.date_of_birth}</p>
+                                <p>{profileDetails?.date_of_birth}</p>
                             </div>
                         </div>
                     </div>

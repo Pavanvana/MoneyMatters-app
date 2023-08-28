@@ -2,16 +2,9 @@ import { useState, useEffect } from "react";
 import SideBar from "../SideBar";
 import AddTransaction from '../AddTransaction'
 import Loader from 'react-loader-spinner'
-import useUserId from "../customHook/getUserId";
+import useUserId from "../CustomHook/getUserId";
 import './index.css'
-import useFetch from "../customHook/useFetch";
-
-const apiStatusConstants = {
-    initial: 'INITIAL',
-    success: 'SUCCESS',
-    failure: 'FAILURE',
-    inProgress: 'IN_PROGRESS',
-}
+import useFetch from "../CustomHook/useFetch";
 
 interface User  {
     name: string,
@@ -23,8 +16,6 @@ interface Users{
     users: User[]
 
 }
-
-type T = /*unresolved*/ any
 
 const Profile = () => {
     const userId = useUserId()
@@ -125,11 +116,11 @@ const Profile = () => {
 
     const renderOnApiStatus = () => {
         switch (apiStatus) {
-            case apiStatusConstants.success:
+            case 'SUCCESS':
                 return renderSuccessView()
-            case apiStatusConstants.failure:
+            case 'FAILURE':
                 return renderFailureView()
-            case apiStatusConstants.inProgress:
+            case 'IN_PROGRESS':
                 return renderLoadingView()
             default:
                 return null

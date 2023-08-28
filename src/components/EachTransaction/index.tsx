@@ -1,10 +1,10 @@
 import './index.css'
 import {Popup} from 'reactjs-popup'
 import {GrFormClose} from 'react-icons/gr'
-import useUserId from '../customHook/getUserId'
+import useUserId from '../CustomHook/getUserId'
 import { useState } from 'react'
 import { format } from 'date-fns'
-import useFetch from '../customHook/useFetch'
+import useFetch from '../CustomHook/useFetch'
 
 interface Props{
     transactionDetails: {

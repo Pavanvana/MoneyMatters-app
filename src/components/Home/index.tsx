@@ -5,22 +5,24 @@ import SideBar from "../SideBar"
 import BarCharts from '../BarCharts'
 import Loader from 'react-loader-spinner'
 import EachTransaction from "../EachTransaction";
-
-import useUserId from '../customHook/getUserId'
-import useFetch from "../customHook/useFetch";
-
+import useUserId from '../CustomHook/getUserId'
+import useFetch from "../CustomHook/useFetch";
+import apiStatusConstants from "../Utilities/apiStatusConstants";
 
 import './index.css'
 
-const apiStatusConstants = {
-    initial: 'INITIAL',
-    success: 'SUCCESS',
-    failure: 'FAILURE',
-    inProgress: 'IN_PROGRESS',
+interface ResponseData{
+  id: number;
+  transaction_name: string;
+  type: string;
+  category: string;
+  amount: number;
+  date: Date;
+  user_id: number;
 }
 
 interface Response {
-  transactions: Array<T>
+  transactions: Array<ResponseData>
 }
 
 interface getCreditsAndDebits{
@@ -38,14 +40,11 @@ interface getCreditsAndDebits{
   ]
 }
 
-type T = /*unresolved*/ any
-
-
 const Home = () => {
     const userId = useUserId()
     const [creditSum, setCreditSum] = useState<number>(0)
     const [debitSum, setDebitSum] = useState<number>(0)
-    const [recentThreeTrensactionList, setRecentThreeTrensactionList] = useState<Array<T>>([])
+    const [recentThreeTrensactionList, setRecentThreeTrensactionList] = useState<Array<ResponseData>>([])
 
     const urlOfRecentThreeTr = " https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=3&offset=0"
     const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
@@ -160,11 +159,11 @@ const Home = () => {
 
     const renderOnApiStatus = () => {
       switch (apiStatus) {
-        case apiStatusConstants.success:
+        case 'SUCCESS':
             return renderSuccessView()
-        case apiStatusConstants.failure:
+        case 'FAILURE':
             return renderFailureView()
-        case apiStatusConstants.inProgress:
+        case 'IN_PROGRESS':
             return renderLoadingView()
         default:
             return null

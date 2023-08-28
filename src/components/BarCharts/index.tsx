@@ -7,28 +7,25 @@ import {
   Legend,
 } from "recharts"
 import Loader from "react-loader-spinner"
-import useUserId from "../customHook/getUserId"
-import useFetch from "../customHook/useFetch"
+import useUserId from "../CustomHook/getUserId"
+import useFetch from "../CustomHook/useFetch"
+
 import './index.css'
 
-const apiStatusConstants = {
-  initial: 'INITIAL',
-  success: 'SUCCESS',
-  failure: 'FAILURE',
-  inProgress: 'IN_PROGRESS',
+interface ResponseData{
+  date: string;
+  sum: number;
+  type: string;
 }
 
 interface Response {
-  last_7_days_transactions_credit_debit_totals: Array<T>
-  last_7_days_transactions_totals_admin: Array<T>
+  last_7_days_transactions_credit_debit_totals: Array<ResponseData>
+  last_7_days_transactions_totals_admin: Array<ResponseData>
 }
-
-type T = /*unresolved*/ any
 
 const BarCharts = () => {
   const userId = useUserId()
-  const [last7DaysCreditsAndDebitsDate, setLast7DaysCreditsAndDebitsDate] = useState<Array<T>>([])
-
+  const [last7DaysCreditsAndDebitsDate, setLast7DaysCreditsAndDebitsDate] = useState<Array<ResponseData>>([])
   const url = userId === '3' ? 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-last-7-days-admin' : 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-7-days' 
   const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
   const userOrAdmin = userId === '3' ? 'admin' : 'user'
@@ -169,11 +166,11 @@ const BarCharts = () => {
   }
   const renderOnApiStatus = () => {
     switch (apiStatus) {
-      case apiStatusConstants.success:
+      case 'SUCCESS':
           return renderBarchart()
-      case apiStatusConstants.failure:
+      case 'FAILURE':
           return renderFailureView()
-      case apiStatusConstants.inProgress:
+      case 'IN_PROGRESS':
           return renderLoadingView()
       default:
           return null

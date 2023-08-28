@@ -1,24 +1,18 @@
 import { useState } from "react"
-
-const apiStatusConstants = {
-    initial: 'INITIAL',
-    success: 'SUCCESS',
-    failure: 'FAILURE',
-    inProgress: 'IN_PROGRESS',
-}
+import apiStatusConstants from "../Utilities/apiStatusConstants";
 
 const useFetch =  (url: string, options: object) => {
     const [data, setData] = useState<object|undefined>()
-    const [apiStatus, setApiStatus] = useState(apiStatusConstants.initial)
+    const [apiStatus, setApiStatus] = useState<apiStatusConstants>('INITIAL')
     const fetchData = async () => {
-        setApiStatus(apiStatusConstants.inProgress)
+        setApiStatus('IN_PROGRESS')
         const response = await fetch(url,options)
         if (response.ok){
-            setApiStatus(apiStatusConstants.success)
+            setApiStatus('SUCCESS')
             const fetchedData = await response.json()
             setData(fetchedData)
         }else{
-            setApiStatus(apiStatusConstants.failure)
+            setApiStatus('FAILURE')
         }
     }
     return {data , apiStatus, fetchData}

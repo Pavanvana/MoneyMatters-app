@@ -9,7 +9,7 @@ interface Props{
     isActive: boolean
 }
 
-const EachType = (props:Props) => {
+const TabItem = (props:Props) => {
     const {transactionType, setActiveTabId, isActive} = props 
     const {id, type} = transactionType
     const onClickType = () => {
@@ -22,4 +22,4 @@ const EachType = (props:Props) => {
         </li>
     )
 }
-export default EachType
+export default TabItem

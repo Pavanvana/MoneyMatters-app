@@ -1,6 +1,6 @@
 import {Route, Redirect} from 'react-router-dom'
 
-import useUserId from '../customHook/getUserId'
+import useUserId from '../CustomHook/getUserId'
 
 interface Props{
   component: React.ComponentType<any> | any;

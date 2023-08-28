@@ -1,9 +1,9 @@
 import {Route, Redirect} from 'react-router-dom'
 
-import Cookies from 'js-cookie'
+import useUserId from '../customHook/getUserId'
 
 const ProtectedRoute = props => {
-  const userId = Cookies.get('user_id')
+  const userId = useUserId()
   if (userId === undefined) {
     return <Redirect to="/login" />
   }

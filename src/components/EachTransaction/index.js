@@ -1,86 +1,87 @@
 import './index.css'
 import {Popup} from 'reactjs-popup'
 import {GrFormClose} from 'react-icons/gr'
-import Cookies from 'js-cookie'
+import useUserId from '../customHook/getUserId'
 import { useState } from 'react'
+import { format } from 'date-fns'
+import useFetch from '../customHook/useFetch'
 
 const EachTransaction = (props) => {
-    const userId = Cookies.get('user_id')
+    const userId = useUserId()
     const {transactionDetails, deleteTransaction} = props 
     const {id,transaction_name, type, category, amount, date} = transactionDetails
     const amountType = type === 'credit' ? '+$' : '-$' 
     const transactionAmountColor = type === 'credit' ? "creditAmount" : "debitAmount"
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const newDate = new Date(date)
-    var hours = newDate.getHours();
-    var minutes = newDate.getMinutes();
-    var ampm = hours >= 12 ? 'pm' : 'am';
-    hours = hours % 12;
-    hours = hours ? hours : 12; 
-    minutes = minutes < 10 ? '0'+minutes : minutes;
-    const dateTime = `${newDate.getDate()} ${monthNames[newDate.getMonth()]}, ${hours}.${minutes} ${ampm}`
 
-    const [transactionName, editTransactionName] = useState(transaction_name);
-    const [transactionType, editTransactionType] = useState(type);
-    const [transactionCategory, editCategory] = useState(category);
-    const [transactionAmount, editAmount] = useState(amount);
-    const [transactiobDate, editDate] = useState(date);
-    const [errorMsg, editErrorMsg] = useState(false)
-    const [error, editError] = useState('')
+    const newDate = new Date(date)
+    const dateTime = format(newDate, 'dd MMM, HH.mm aaa')
+
+    let dateFormate = format(newDate, 'yyyy-MM-dd')
+
+    const [transactionName, setTransactionName] = useState(transaction_name);
+    const [transactionType, setTransactionType] = useState(type);
+    const [transactionCategory, setCategory] = useState(category);
+    const [transactionAmount, setAmount] = useState(amount);
+    const [transactiobDate, setDate] = useState(dateFormate);
+    const [errorMsg, setErrorMsg] = useState(false)
+    const [error, setError] = useState('')
+
+    const parseAmount = parseInt(transactionAmount)
+    const url = "https://bursting-gelding-24.hasura.app/api/rest/update-transaction"
+    const transaction = {
+    "id": id,
+    "name": transactionName,
+    "type": transactionType,
+    "category": transactionCategory,
+    "amount": parseAmount,
+    "date": new Date(transactiobDate),
+    }
+    const options={
+    method: 'POST',
+    headers: {
+        'content-type': 'application/json',
+        'x-hasura-admin-secret': 'g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF',
+        'x-hasura-role': 'user',
+        'x-hasura-user-id': userId
+    },
+    body: JSON.stringify(transaction)
+    }
+
+    const {fetchData} = useFetch(url, options)
 
     const onChangeTrName = (event) => {
-      editTransactionName(event.target.value)
+      setTransactionName(event.target.value)
     }
     const onChangeTrType = (event) => {
-      editTransactionType(event.target.value)
+      setTransactionType(event.target.value)
     }
     const onChangeCategory = (event) => {
-      editCategory(event.target.value)
+      setCategory(event.target.value)
     }
     const onChangeAmount = (event) => {
-      editAmount(event.target.value)
+      setAmount(event.target.value)
     }
     const onChangeDate = (event) => {
-      editDate(event.target.value)
+      setDate(event.target.value)
     }
 
     const onClickUpdateForm = async (event) => {
       event.preventDefault()
       if (transactionName !== '' && transactionType !== '' && transactionCategory !== '' && transactionAmount !== '' && transactiobDate !== ''){
-        editErrorMsg(false)
+        setErrorMsg(false)
         if (transactionName.length < 30){
-          editErrorMsg(false)
-          const parseAmount = parseInt(transactionAmount)
-          const url = "https://bursting-gelding-24.hasura.app/api/rest/update-transaction"
-          const transactionDetails = {
-            "id": id,
-            "name": transactionName,
-            "type": transactionType,
-            "category": transactionCategory,
-            "amount": parseAmount,
-            "date": new Date(transactiobDate),
-          }
-          const options={
-            method: 'POST',
-            headers: {
-              'content-type': 'application/json',
-              'x-hasura-admin-secret': 'g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF',
-              'x-hasura-role': 'user',
-              'x-hasura-user-id': userId
-            },
-            body: JSON.stringify(transactionDetails)
-          }
-          await fetch(url, options)
+          setErrorMsg(false)
+          fetchData()
           alert('Transaction Updated')
           window.location.reload(false)
         }else{
-          editErrorMsg(true)
-          editError('*Transaction name should less Than 30 characters')
+          setErrorMsg(true)
+          setError('*Transaction name should less Than 30 characters')
         }
       }
       else{
-        editErrorMsg(true)
-        editError('*Required')
+        setErrorMsg(true)
+        setError('*Required')
       }
     }
 

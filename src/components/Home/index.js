@@ -1,11 +1,16 @@
-import { Component } from "react";
+import { useState , useEffect} from "react";
+
 import AddTransaction from '../AddTransaction'
-import './index.css'
 import SideBar from "../SideBar"
 import BarCharts from '../BarCharts'
 import Loader from 'react-loader-spinner'
-import Cookies from 'js-cookie'
 import EachTransaction from "../EachTransaction";
+
+import useUserId from '../customHook/getUserId'
+import useFetch from "../customHook/useFetch";
+
+
+import './index.css'
 
 const apiStatusConstants = {
     initial: 'INITIAL',
@@ -14,127 +19,64 @@ const apiStatusConstants = {
     inProgress: 'IN_PROGRESS',
 }
 
-class Home extends Component{
-    state = {
-        creditSum: "",
-        debitSum: "",
-        apiStatus: apiStatusConstants.initial,
-        recentThreeTrensactionList: [],
-    }
-    componentDidMount = () => {
-        this.getCreditAndDebitSum()
-        this.getRecentThreeTransactions()
-    }
+const Home = () => {
+    const userId = useUserId()
+    const [creditSum, setCreditSum] = useState('')
+    const [debitSum, setDebitSum] = useState('')
+    const [recentThreeTrensactionList, setRecentThreeTrensactionList] = useState([])
 
-    getRecentThreeTransactions = async () => {
-      this.setState({apiStatus: apiStatusConstants.inProgress})
-      const url = " https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=3&offset=0"
-      const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
-      const userId = Cookies.get('user_id')
-      const options = {
-        method: 'GET',
-        headers:{
-          "x-hasura-admin-secret": accesToken,
-          'Content-Type' : "application/json",
-          'x-hasura-role': 'user',
-          'x-hasura-user-id': userId
-        }
-      }
-      const response = await fetch(url, options)
-      const data = await response.json()
-      if (response.ok){
-        this.setState({recentThreeTrensactionList: [...data.transactions], apiStatus: apiStatusConstants.success})
-      }else{
-        this.setState({apiStatus: apiStatusConstants.failure})
+    const urlOfRecentThreeTr = " https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=3&offset=0"
+    const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
+    const userOrAdmin = userId === '3' ? "admin" : "user"
+    const options = {
+      method: 'GET',
+      headers:{
+        "x-hasura-admin-secret": accesToken,
+        'Content-Type' : "application/json",
+        'x-hasura-role': userOrAdmin,
+        'x-hasura-user-id': userId
       }
     }
+    const {data, apiStatus, fetchData} = useFetch(urlOfRecentThreeTr, options)
+    const urlOfCreditsAndDebits = userId === '3' ? "https://bursting-gelding-24.hasura.app/api/rest/transaction-totals-admin" : "https://bursting-gelding-24.hasura.app/api/rest/credit-debit-totals"
+    const {data: creditsAndDebitsData, fetchData: fetchDataCreditsAndDebits} = useFetch(urlOfCreditsAndDebits, options)
 
-    renderSuccessView = () => {
-      const {recentThreeTrensactionList} = this.state
-      return(
-        <ul className="last-transactions-container">
-          {recentThreeTrensactionList.map(eachTransaction => (
-            <EachTransaction key={eachTransaction.id} deleteTransaction={this.deleteTransaction} transactionDetails={eachTransaction}/>
-          ))}
-        </ul>
-      )
-    }
+    useEffect(() => {
+      fetchData()
+      fetchDataCreditsAndDebits()
+    }, [])
 
-    onClickReTry = () => {
-      this.getRecentThreeTransactions()
-    }
-    
-    renderFailureView = () => (
-        <div className="failure-container">
-            <img
-            src="https://res.cloudinary.com/daflxmokq/image/upload/v1677128965/alert-triangle_yavvbl.png"
-            alt="failure view"
-            className="failure view"
-            />
-            <p className="alert-msg">Something went wrong. Please try again</p>
-            <button
-            className="tryagain-btn"
-            type="button"
-            onClick={this.onClickReTry}
-            >
-            Try again
-            </button>
-        </div>
-    )
+    useEffect(() => {
+        getCreditAndDebitSum()
+        getRecentThreeTransactions()
+    }, [userId, apiStatus, data, creditsAndDebitsData])
 
-    renderLoadingView = () => (
-        <div className="loader-container" testid="loader">
-          <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
-        </div>
-    )
-
-    onRenderLastThreeTrs = () => {
-      const {apiStatus} = this.state
-      switch (apiStatus) {
-        case apiStatusConstants.success:
-            return this.renderSuccessView()
-        case apiStatusConstants.failure:
-            return this.renderFailureView()
-        case apiStatusConstants.inProgress:
-            return this.renderLoadingView()
-        default:
-            return null
-        }
-    }
-
-    getCreditAndDebitSum = async () => {
-      const userId = Cookies.get('user_id')
-      const url = userId === '3' ? "https://bursting-gelding-24.hasura.app/api/rest/transaction-totals-admin" : "https://bursting-gelding-24.hasura.app/api/rest/credit-debit-totals"
-      const userOrAdmin = userId === '3' ? "admin" : "user"
-      const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
-      const options = {
-        method: 'GET',
-        headers:{
-          "x-hasura-admin-secret": accesToken,
-          'Content-Type' : "application/json",
-          'x-hasura-role': userOrAdmin,
-          'x-hasura-user-id': userId
-        }
+    const getRecentThreeTransactions = () => {
+      if (data.length === undefined){
+        setRecentThreeTrensactionList([...data.transactions])
       }
-      const response = await fetch(url, options)
-      const data = await response.json()
-      if (response.ok){
-        let creditSumData;
-        let debitSumData;
+    }
+
+    const getCreditAndDebitSum = async () => {
+      let creditSumData;
+      let debitSumData;
+      if (creditsAndDebitsData.length === undefined){
         if (userId === '3'){
-           creditSumData = data.transaction_totals_admin.find(each => each.type === 'credit')
-           debitSumData = data.transaction_totals_admin.find(each => each.type === 'debit')
+          creditSumData = creditsAndDebitsData.transaction_totals_admin.find(each => each.type === 'credit')
+          debitSumData = creditsAndDebitsData.transaction_totals_admin.find(each => each.type === 'debit')
         }else{
-           creditSumData = data.totals_credit_debit_transactions.find(each => each.type === 'credit')
-           debitSumData = data.totals_credit_debit_transactions.find(each => each.type === 'debit')
+            creditSumData = creditsAndDebitsData.totals_credit_debit_transactions.find(each => each.type === 'credit')
+            debitSumData = creditsAndDebitsData.totals_credit_debit_transactions.find(each => each.type === 'debit')
         }
-        this.setState({creditSum:creditSumData.sum, debitSum: debitSumData.sum})
-      }
+        let creditData = creditSumData === undefined ? 0 : creditSumData.sum 
+        let debitData = debitSumData === undefined ? 0 : debitSumData.sum
+        setCreditSum(creditData)
+        setDebitSum(debitData)
+        }
     }
 
-    deleteTransaction = async (id) => {
+    const deleteTransaction = async (id) => {
       const url = " https://bursting-gelding-24.hasura.app/api/rest/delete-transaction";
-      const userId = Cookies.get('user_id')
       const deleteTransactionId = {
           id
       }
@@ -153,41 +95,89 @@ class Home extends Component{
       window.location.reload(false)
     }
 
-    render(){
-        const { creditSum, debitSum} = this.state
-        return(
-            <div className="main-container">
-                <SideBar/>
-                <div className="home-container">
-                    <div className="heading-container">
-                        <h1 className="accounts-heading">Accounts</h1>
-                        <AddTransaction/>
-                    </div>
-                    <div className="accounts-container">
-                        <div className="credit-debit-container">
-                            <div className="credit-container">
-                                <div className="amount-credit-container">
-                                    <h1 className="credit-amount">${creditSum}</h1>
-                                    <p className="credit-name">Credit</p>
-                                </div>
-                                <img className="credit-img" src="https://res.cloudinary.com/daflxmokq/image/upload/v1690631804/Group_1_dcvrzx.jpg" alt="credit"/>
+    const renderSuccessView = () => {
+      return(
+        <ul className="last-transactions-container">
+          {recentThreeTrensactionList.map(eachTransaction => (
+            <EachTransaction key={eachTransaction.id} deleteTransaction={deleteTransaction} transactionDetails={eachTransaction}/>
+          ))}
+        </ul>
+      )
+    }
+
+    const onClickRetry = () => {
+      this.getRecentThreeTransactions()
+    }
+    
+    const renderFailureView = () => (
+        <div className="failure-container">
+            <img
+            src="https://res.cloudinary.com/daflxmokq/image/upload/v1677128965/alert-triangle_yavvbl.png"
+            alt="failure view"
+            className="failure view"
+            />
+            <p className="alert-msg">Something went wrong. Please try again</p>
+            <button
+            className="tryagain-btn"
+            type="button"
+            onClick={onClickRetry}
+            >
+            Try again
+            </button>
+        </div>
+    )
+
+    const renderLoadingView = () => (
+        <div className="loader-container" testid="loader">
+          <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
+        </div>
+    )
+
+    const renderOnApiStatus = () => {
+      switch (apiStatus) {
+        case apiStatusConstants.success:
+            return renderSuccessView()
+        case apiStatusConstants.failure:
+            return renderFailureView()
+        case apiStatusConstants.inProgress:
+            return renderLoadingView()
+        default:
+            return null
+        }
+    }
+
+    return(
+        <div className="main-container">
+            <SideBar activeTab="dashboard"/>
+            <div className="home-container">
+                <div className="heading-container">
+                    <h1 className="accounts-heading">Accounts</h1>
+                    <AddTransaction/>
+                </div>
+                <div className="accounts-container">
+                    <div className="credit-debit-container">
+                        <div className="credit-container">
+                            <div className="amount-credit-container">
+                                <h1 className="credit-amount">${creditSum}</h1>
+                                <p className="credit-name">Credit</p>
                             </div>
-                            <div className="credit-container">
-                                <div className="amount-credit-container">
-                                    <h1 className="debit-amount">${debitSum}</h1>
-                                    <p className="credit-name">Debit</p>
-                                </div>
-                                <img src="https://res.cloudinary.com/daflxmokq/image/upload/v1690631794/Group_2_klo0rc.jpg" alt="debit"/>
-                            </div>
+                            <img className="credit-img" src="https://res.cloudinary.com/daflxmokq/image/upload/v1690631804/Group_1_dcvrzx.jpg" alt="credit"/>
                         </div>
-                          <h2 className="last-transaction-heading">Last Transaction</h2>
-                            {this.onRenderLastThreeTrs()}
-                          <h2 className="debit-credit-overview-name">Debit & Credit Overview</h2>
-                          <BarCharts/>
+                        <div className="credit-container">
+                            <div className="amount-credit-container">
+                                <h1 className="debit-amount">${debitSum}</h1>
+                                <p className="credit-name">Debit</p>
+                            </div>
+                            <img src="https://res.cloudinary.com/daflxmokq/image/upload/v1690631794/Group_2_klo0rc.jpg" alt="debit"/>
+                        </div>
                     </div>
+                      <h2 className="last-transaction-heading">Last Transaction</h2>
+                        {renderOnApiStatus()}
+                      <h2 className="debit-credit-overview-name">Debit & Credit Overview</h2>
+                      <BarCharts/>
                 </div>
             </div>
-        )
-    }
+        </div>
+    )
 }
 export default Home

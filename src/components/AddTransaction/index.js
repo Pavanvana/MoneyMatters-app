@@ -2,72 +2,75 @@ import './index.css'
 import {BiPlus} from 'react-icons/bi'
 import {GrFormClose} from 'react-icons/gr'
 import {Popup} from 'reactjs-popup'
-import Cookies from 'js-cookie'
 import { useState } from 'react'
+import useUserId from '../customHook/getUserId'
+import useFetch from '../customHook/useFetch'
 
 const AddTransaction = () => {
-    const userId = Cookies.get('user_id')
-    const [transactionName, editTransactionName] = useState('');
-    const [transactionType, editTransactionType] = useState('');
-    const [category, editCategory] = useState('');
-    const [amount, editAmount] = useState('');
-    const [date, editDate] = useState('');
-    const [errorMsg, editErrorMsg] = useState(false)
-    const [error, editError] = useState('')
+    const userId = useUserId()
+    const [transactionName, setTransactionName] = useState('');
+    const [transactionType, setTransactionType] = useState('');
+    const [category, setCategory] = useState('');
+    const [amount, setAmount] = useState('');
+    const [date, setDate] = useState('');
+    const [errorMsg, setErrorMsg] = useState(false)
+    const [error, setError] = useState('')
+
+    const url = "https://bursting-gelding-24.hasura.app/api/rest/add-transaction"
+    const transactionDetails = {
+      "name": transactionName,
+      "type": transactionType,
+      "category": category,
+      "amount": amount,
+      "date": new Date(date),
+      "user_id": userId
+    }
+    const options={
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-hasura-admin-secret': 'g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF',
+        'x-hasura-role': 'user',
+        'x-hasura-user-id': userId
+      },
+      body: JSON.stringify(transactionDetails)
+    }
+
+    const {fetchData} = useFetch(url, options)
 
     const onChangeTrName = (event) => {
-      editTransactionName(event.target.value)
+      setTransactionName(event.target.value)
     }
     const onChangeTrType = (event) => {
-      editTransactionType(event.target.value)
+      setTransactionType(event.target.value)
     }
     const onChangeCategory = (event) => {
-      editCategory(event.target.value)
+      setCategory(event.target.value)
     }
     const onChangeAmount = (event) => {
-      editAmount(event.target.value)
+      setAmount(parseInt(event.target.value))
     }
     const onChangeDate = (event) => {
-      editDate(event.target.value)
+      setDate(event.target.value)
     }
 
-    const onSubmitForm = async (event) => {
+    const onSubmitForm = (event) => {
       event.preventDefault()
       if (transactionName !== '' && transactionType !== '' && category !== '' && amount !== '' && date !== ''){
-        editErrorMsg(false)
+        setErrorMsg(false)
         if (transactionName.length < 30){
-          editErrorMsg(false)
-          const parseAmount = parseInt(amount)
-          const url = "https://bursting-gelding-24.hasura.app/api/rest/add-transaction"
-          const transactionDetails = {
-            "name": transactionName,
-            "type": transactionType,
-            "category": category,
-            "amount": parseAmount,
-            "date": new Date(date),
-            "user_id": userId
-          }
-          const options={
-            method: 'POST',
-            headers: {
-              'content-type': 'application/json',
-              'x-hasura-admin-secret': 'g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF',
-              'x-hasura-role': 'user',
-              'x-hasura-user-id': userId
-            },
-            body: JSON.stringify(transactionDetails)
-          }
-          await fetch(url, options)
+          setErrorMsg(false)
+          fetchData()
           alert('Transaction Added')
           window.location.reload(false)
         }else{
-          editErrorMsg(true)
-          editError('*Transaction name should less Than 30 characters')
+          setErrorMsg(true)
+          setError('*Transaction name should less Than 30 characters')
         }
       }
       else{
-        editErrorMsg(true)
-        editError('*Required')
+        setErrorMsg(true)
+        setError('*Required')
       }
     }
     return(

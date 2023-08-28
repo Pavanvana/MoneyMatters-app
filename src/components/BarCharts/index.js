@@ -1,4 +1,4 @@
-import { Component } from "react"
+import { useState, useEffect } from "react"
 import {
   BarChart,
   Bar,
@@ -7,55 +7,56 @@ import {
   Legend,
 } from "recharts"
 import Loader from "react-loader-spinner"
-import Cookies from "js-cookie"
-
+import useUserId from "../customHook/getUserId"
+import useFetch from "../customHook/useFetch"
 import './index.css'
+
 const apiStatusConstants = {
   initial: 'INITIAL',
   success: 'SUCCESS',
   failure: 'FAILURE',
   inProgress: 'IN_PROGRESS',
 }
-class BarCharts extends Component{
-  state = {
-    apiStatus: apiStatusConstants.initial,
-    last7DaysCreditsAndDebitsDate: [],
-  }
-  componentDidMount = () => {
-    this.getLast7daysCreditsAndDebits()
-  }
-  getLast7daysCreditsAndDebits = async () => {
-    this.setState({apiStatus: apiStatusConstants.inProgress})
-    const userId = Cookies.get('user_id')
-    const url = userId === '3' ? 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-last-7-days-admin' : 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-7-days' 
-    const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
-    const userOrAdmin = userId === '3' ? 'admin' : 'user'
-    const options = {
-      method: 'GET',
-      headers:{
-        "x-hasura-admin-secret": accesToken,
-        'Content-Type' : "application/json",
-        'x-hasura-role': userOrAdmin,
-        'x-hasura-user-id': userId
-      }
+
+
+const BarCharts = () => {
+  const userId = useUserId()
+  const [last7DaysCreditsAndDebitsDate, setLast7DaysCreditsAndDebitsDate] = useState([])
+
+  const url = userId === '3' ? 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-last-7-days-admin' : 'https://bursting-gelding-24.hasura.app/api/rest/daywise-totals-7-days' 
+  const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
+  const userOrAdmin = userId === '3' ? 'admin' : 'user'
+  const options = {
+    method: 'GET',
+    headers:{
+      "x-hasura-admin-secret": accesToken,
+      'Content-Type' : "application/json",
+      'x-hasura-role': userOrAdmin,
+      'x-hasura-user-id': userId
     }
-    const response = await fetch(url, options)
-    const data = await response.json()
-    if (response.ok){
-      if (userId === '3'){
-        this.setState({last7DaysCreditsAndDebitsDate: data.last_7_days_transactions_totals_admin, apiStatus: apiStatusConstants.success})
-      }else{
-        this.setState({last7DaysCreditsAndDebitsDate: data.last_7_days_transactions_credit_debit_totals, apiStatus: apiStatusConstants.success})
-      }
+  }
+  const {data, apiStatus, fetchData} = useFetch(url, options)
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  useEffect(() => {
+    getLast7daysCreditsAndDebits()
+  }, [userId, apiStatus, data])
+  
+  const getLast7daysCreditsAndDebits = async () => {
+    if (userId === '3'){
+      setLast7DaysCreditsAndDebitsDate(data.last_7_days_transactions_totals_admin)
     }else{
-      this.setState({apiStatus: apiStatusConstants.failure})
+      setLast7DaysCreditsAndDebitsDate(data.last_7_days_transactions_credit_debit_totals)
     }
   }
-  onClickReTry = () => {
-    this.getLast7daysCreditsAndDebits()
+  const onClickRetry = () => {
+    getLast7daysCreditsAndDebits()
   }
   
-  renderFailureView = () => (
+  const renderFailureView = () => (
       <div className="failure-container">
           <img
           src="https://res.cloudinary.com/daflxmokq/image/upload/v1677128965/alert-triangle_yavvbl.png"
@@ -66,21 +67,20 @@ class BarCharts extends Component{
           <button
           className="tryagain-btn"
           type="button"
-          onClick={this.onClickReTry}
+          onClick={onClickRetry}
           >
           Try again
           </button>
       </div>
   )
 
-  renderLoadingView = () => (
+  const renderLoadingView = () => (
       <div className="loader-container" testid="loader">
         <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
       </div>
   )
-  renderBarchart = () => {
-      const {last7DaysCreditsAndDebitsDate} = this.state
-      const DataFormatter = (number) => {
+  const renderBarchart = () => {
+      const dataFormatter = (number) => {
         if (number > 1000) {
           return `${(number / 1000).toString()}k`
         }
@@ -91,9 +91,9 @@ class BarCharts extends Component{
       let totalCreditSum = 0
       let totalDebitSum = 0
       for (let i = 0; i < 7; i++){
-        const findDat = last7DaysCreditsAndDebitsDate.filter(each =>new Date(each.date).getDay() === i)
-        const credit = findDat.find(each => each.type === 'credit')
-        const debit = findDat.find(each => each.type === 'debit')
+        const findData = last7DaysCreditsAndDebitsDate !== undefined && last7DaysCreditsAndDebitsDate.filter(each =>new Date(each.date).getDay() === i)
+        const credit = last7DaysCreditsAndDebitsDate !== undefined && findData.find(each => each.type === 'credit')
+        const debit = last7DaysCreditsAndDebitsDate !== undefined && findData.find(each => each.type === 'debit')
         const creditSum = credit === undefined ? 0 : credit.sum
         const debitSum = debit === undefined ? 0 : debit.sum
         totalCreditSum += creditSum
@@ -137,7 +137,7 @@ class BarCharts extends Component{
                 }}
               />
               <YAxis
-                tickFormatter={DataFormatter}
+                tickFormatter={dataFormatter}
                 tick={{
                   stroke: '#718EBF',
                   strokeWidth: 1,
@@ -158,26 +158,25 @@ class BarCharts extends Component{
       </>
     )
   }
-  onRenderBarChart = () => {
-    const {apiStatus} = this.state
+  const renderOnApiStatus = () => {
     switch (apiStatus) {
       case apiStatusConstants.success:
-          return this.renderBarchart()
+          return renderBarchart()
       case apiStatusConstants.failure:
-          return this.renderFailureView()
+          return renderFailureView()
       case apiStatusConstants.inProgress:
-          return this.renderLoadingView()
+          return renderLoadingView()
       default:
           return null
       }
   }
 
-    render(){
-      return(
-          <div className="debit-credit-overview-container">
-            {this.onRenderBarChart()}
-          </div>
-      )
-    }
+    
+  return(
+      <div className="debit-credit-overview-container">
+        {renderOnApiStatus()}
+      </div>
+  )
+    
 }
 export default BarCharts

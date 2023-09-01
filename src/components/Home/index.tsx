@@ -1,15 +1,16 @@
-import { useState , useEffect} from "react";
+import { useEffect} from "react";
 
 import AddTransaction from '../AddTransaction'
 import SideBar from "../SideBar"
 import BarCharts from '../BarCharts'
-import Loader from 'react-loader-spinner'
+import { TailSpin } from 'react-loader-spinner'
 import EachTransaction from "../EachTransaction";
 import useUserId from '../CustomHook/getUserId'
 import useFetch from "../CustomHook/useFetch";
-import apiStatusConstants from "../Utilities/apiStatusConstants";
+import { useStore } from "../Context/storeContext";
 
 import './index.css'
+import { observer } from "mobx-react-lite";
 
 interface ResponseData{
   id: number;
@@ -18,35 +19,18 @@ interface ResponseData{
   category: string;
   amount: number;
   date: Date;
-  user_id: number;
+  user_id: string|undefined;
 }
 
 interface Response {
   transactions: Array<ResponseData>
 }
 
-interface getCreditsAndDebits{
-  totals_credit_debit_transactions: [
-    {
-        type: string;
-        sum: number;
-    }
-  ],
-  transaction_totals_admin:[
-    {
-      type: string;
-      sum: number;
-    }
-  ]
-}
-
-const Home = () => {
+const Home = observer(() => {
+    const {transactionStore} = useStore()
     const userId = useUserId()
-    const [creditSum, setCreditSum] = useState<number>(0)
-    const [debitSum, setDebitSum] = useState<number>(0)
-    const [recentThreeTrensactionList, setRecentThreeTrensactionList] = useState<Array<ResponseData>>([])
 
-    const urlOfRecentThreeTr = " https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=3&offset=0"
+    const urlOfRecentThreeTr = "https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=100&offset=0"
     const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
     const userOrAdmin = userId === '3' ? "admin" : "user"
     const options = {
@@ -59,45 +43,35 @@ const Home = () => {
       }
     }
     const {data, apiStatus, fetchData} = useFetch(urlOfRecentThreeTr, options)
-    const urlOfCreditsAndDebits = userId === '3' ? "https://bursting-gelding-24.hasura.app/api/rest/transaction-totals-admin" : "https://bursting-gelding-24.hasura.app/api/rest/credit-debit-totals"
-    const {data: creditsAndDebitsData , fetchData: fetchDataCreditsAndDebits} = useFetch(urlOfCreditsAndDebits, options)
-
+    
     useEffect(() => {
       fetchData()
-      fetchDataCreditsAndDebits()
     }, [])
 
     useEffect(() => {
-        getCreditAndDebitSum()
+      if (apiStatus === "SUCCESS"){
         getRecentThreeTransactions()
-    }, [userId, apiStatus, data, creditsAndDebitsData])
+      }
+    }, [userId, apiStatus, data])
 
     const getRecentThreeTransactions = () => {
       const response = data as Response|undefined
       if (response !== undefined){
         const recentThreeTransactions = response.transactions.sort((a, b) => new Date(a.date) < new Date(b.date) ? 1 : -1)
-        setRecentThreeTrensactionList([...recentThreeTransactions])
+        const updateTransactionData = recentThreeTransactions.map(each => {
+          return {
+              amount: each.amount,
+              category: each.category,
+              date: each.date,
+              id: each.id,
+              name: each.transaction_name,
+              type: each.type,
+              user_id: each.user_id
+          }
+        })
+        transactionStore.setTransactionList(updateTransactionData)
       }
-    }
-
-    const getCreditAndDebitSum = async () => {
-      let creditSumData;
-      let debitSumData;
-      const creditsDebitsSum = creditsAndDebitsData as getCreditsAndDebits|undefined
-      if (creditsDebitsSum !== undefined){
-        if (userId === '3'){
-          creditSumData = creditsDebitsSum.transaction_totals_admin.find(each => each.type === 'credit')
-          debitSumData = creditsDebitsSum.transaction_totals_admin.find(each => each.type === 'debit')
-        }else{
-            creditSumData = creditsDebitsSum.totals_credit_debit_transactions.find(each => each.type === 'credit')
-            debitSumData = creditsDebitsSum.totals_credit_debit_transactions.find(each => each.type === 'debit')
-        }
-        let creditData = creditSumData === undefined ? 0 : creditSumData.sum 
-        let debitData = debitSumData === undefined ? 0 : debitSumData.sum
-        setCreditSum(creditData)
-        setDebitSum(debitData)
-        }
-    }
+    } 
 
     const deleteTransaction = async (id: number) => {
       const url = " https://bursting-gelding-24.hasura.app/api/rest/delete-transaction";
@@ -114,15 +88,17 @@ const Home = () => {
           },
           body: JSON.stringify(deleteTransactionId)
       }
-      await fetch(url, options)
-      alert('Transaction Deleted')
-      window.location.reload()
+      const response = await fetch(url, options)
+      if (response.ok){
+          transactionStore.deleteTransaction(id)
+      }
     }
 
     const renderSuccessView = () => {
+      const threeTransactions = transactionStore.transactionsList.slice(0,3)
       return(
         <ul className="last-transactions-container">
-          {recentThreeTrensactionList.map(eachTransaction => (
+          {threeTransactions.map((eachTransaction) => (
             <EachTransaction key={eachTransaction.id} deleteTransaction={deleteTransaction} transactionDetails={eachTransaction}/>
           ))}
         </ul>
@@ -153,7 +129,7 @@ const Home = () => {
 
     const renderLoadingView = () => (
         <div className="loader-container">
-          <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
+          <TailSpin color="#4094EF" height={50} width={50} />
         </div>
     )
 
@@ -182,14 +158,14 @@ const Home = () => {
                     <div className="credit-debit-container">
                         <div className="credit-container">
                             <div className="amount-credit-container">
-                                <h1 className="credit-amount">${creditSum}</h1>
+                                <h1 className="credit-amount">${transactionStore.creditSum}</h1>
                                 <p className="credit-name">Credit</p>
                             </div>
                             <img className="credit-img" src="https://res.cloudinary.com/daflxmokq/image/upload/v1690631804/Group_1_dcvrzx.jpg" alt="credit"/>
                         </div>
                         <div className="credit-container">
                             <div className="amount-credit-container">
-                                <h1 className="debit-amount">${debitSum}</h1>
+                                <h1 className="debit-amount">${transactionStore.debitSum}</h1>
                                 <p className="credit-name">Debit</p>
                             </div>
                             <img src="https://res.cloudinary.com/daflxmokq/image/upload/v1690631794/Group_2_klo0rc.jpg" alt="debit"/>
@@ -203,5 +179,5 @@ const Home = () => {
             </div>
         </div>
     )
-}
+})
 export default Home

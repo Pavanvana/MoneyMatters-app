@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import SideBar from "../SideBar";
 import AddTransaction from '../AddTransaction'
-import Loader from 'react-loader-spinner'
+import { TailSpin } from 'react-loader-spinner'
 import useUserId from "../CustomHook/getUserId";
 import './index.css'
 import useFetch from "../CustomHook/useFetch";
@@ -72,7 +72,7 @@ const Profile = () => {
 
     const renderLoadingView = () => (
         <div className="loader-container">
-          <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
+          <TailSpin color="#4094EF" height={50} width={50} />
         </div>
     )
 

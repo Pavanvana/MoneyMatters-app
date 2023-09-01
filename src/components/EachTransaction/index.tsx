@@ -2,41 +2,56 @@ import './index.css'
 import {Popup} from 'reactjs-popup'
 import {GrFormClose} from 'react-icons/gr'
 import useUserId from '../CustomHook/getUserId'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
 import useFetch from '../CustomHook/useFetch'
+import { observer } from 'mobx-react-lite'
+import { useStore } from '../Context/storeContext'
 
 interface Props{
     transactionDetails: {
         id: number;
-        transaction_name: string;
+        name: string;
         type: string;
         category: string;
         amount:number;
-        date: Date
+        date: Date;
     }
     deleteTransaction: Function
 }
 
-const EachTransaction = (props: Props) => {
+interface Response{
+    update_transactions_by_pk: {
+        amount:number
+        category: string
+        date: Date
+        id: number
+        transaction_name: string
+        type: string
+    }
+}
+
+const EachTransaction = observer((props: Props) => {
+    const {transactionStore} = useStore()
     const userId = useUserId()
     const {transactionDetails, deleteTransaction} = props 
-    const {id,transaction_name, type, category, amount, date} = transactionDetails
+    const {id,name, type, category, amount, date} = transactionDetails
     const amountType = type === 'credit' ? '+$' : '-$' 
     const transactionAmountColor = type === 'credit' ? "creditAmount" : "debitAmount"
 
     const newDate = new Date(date)
     const dateTime = format(newDate, 'dd MMM, HH.mm aaa')
 
-    let dateFormate = format(newDate, 'yyyy-MM-dd')
+    const formateDate = format(newDate, 'yyyy-MM-dd')
 
-    const [transactionName, setTransactionName] = useState(transaction_name);
+    const [transactionName, setTransactionName] = useState(name);
     const [transactionType, setTransactionType] = useState(type);
     const [transactionCategory, setCategory] = useState(category);
     const [transactionAmount, setAmount] = useState<string|number>(amount);
-    const [transactiobDate, setDate] = useState(dateFormate);
+    const [transactiobDate, setDate] = useState(formateDate);
     const [errorMsg, setErrorMsg] = useState(false)
     const [error, setError] = useState('')
+    const [showPopup, setShowPopup] = useState(false)
 
     const url = "https://bursting-gelding-24.hasura.app/api/rest/update-transaction"
     const transaction = {
@@ -45,7 +60,7 @@ const EachTransaction = (props: Props) => {
     "type": transactionType,
     "category": transactionCategory,
     "amount": transactionAmount,
-    "date": new Date(transactiobDate),
+    "date": new Date(date),
     }
     const options={
     method: 'POST',
@@ -58,7 +73,22 @@ const EachTransaction = (props: Props) => {
     body: JSON.stringify(transaction)
     }
 
-    const {fetchData} = useFetch(url, options)
+    const {apiStatus, data, fetchData} = useFetch(url, options)
+    useEffect(() => {
+        const response = data as Response | undefined
+        if(apiStatus === "SUCCESS" && response !== undefined){
+            const obj = response.update_transactions_by_pk
+            const updateTransactionData = {
+                amount: obj.amount,
+                category: obj.category,
+                date: obj.date,
+                id: obj.id,
+                name: obj.transaction_name,
+                type: obj.type,
+            }
+            transactionStore.editTransaction({...updateTransactionData, user_id: userId})
+        }
+    }, [apiStatus, data])
 
     const onClickUpdateForm = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
@@ -67,8 +97,7 @@ const EachTransaction = (props: Props) => {
         if (transactionName.length < 30){
           setErrorMsg(false)
           fetchData()
-          alert('Transaction Updated')
-          window.location.reload()
+          setShowPopup(false)
         }else{
           setErrorMsg(true)
           setError('*Transaction name should less Than 30 characters')
@@ -94,7 +123,7 @@ const EachTransaction = (props: Props) => {
                         <img className="users-profile-admin" src="https://images.unsplash.com/photo-1575936123452-b67c3203c357?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8aW1hZ2V8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60" alt="profile-icon"/>
                     </div>
                 }
-                <p className="transaction-name">{transaction_name}</p>
+                <p className="transaction-name">{name}</p>
             </div>
             <div className="transaction-name-container">
                 <p className="transaction-type">{category}</p>
@@ -105,17 +134,12 @@ const EachTransaction = (props: Props) => {
                         <img className="edit-delete-img" src="https://res.cloudinary.com/daflxmokq/image/upload/v1690633995/pencil-02_qeul6u.jpg" alt="edit"/>
                     </button>
                     :
-                    <Popup
-                        modal
-                        trigger={
-                            <button type="button" className="edit-delete-button">
-                                <img className="edit-delete-img" src="https://res.cloudinary.com/daflxmokq/image/upload/v1690633995/pencil-02_qeul6u.jpg" alt="edit"/>
-                            </button>
-                        }
-                        className="popup-content"
-                        position="right center"
-                        closeOnEscape
-                    >
+                    <>
+                    <button type="button" className="edit-delete-button" onClick={(e) => setShowPopup(true)}>
+                        <img className="edit-delete-img" src="https://res.cloudinary.com/daflxmokq/image/upload/v1690633995/pencil-02_qeul6u.jpg" alt="edit"/>
+                    </button>
+                    
+                    {showPopup && 
                     <form  className="model" onSubmit={(e) => onClickUpdateForm(e)}>
                     <div className="overlay">
                         <div className="modal-container">
@@ -124,7 +148,7 @@ const EachTransaction = (props: Props) => {
                                 <button
                                 className="close-btn"
                                 type="button"
-                            
+                                onClick={(e) => setShowPopup(false)}
                                 >
                                 <GrFormClose size="20"/>
                                 </button>
@@ -163,8 +187,8 @@ const EachTransaction = (props: Props) => {
                             <button type='submit' className='Add-transaction-btn'>Update Transaction</button>
                         </div>
                         </div>
-                    </form>
-                    </Popup>
+                    </form>}
+                    </>
                 }
                 {userId === '3' ? 
                     <button type="button" className="edit-delete-button">
@@ -217,5 +241,5 @@ const EachTransaction = (props: Props) => {
             </div>
         </li>
     )
-}
+})
 export default EachTransaction

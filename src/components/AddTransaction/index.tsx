@@ -1,12 +1,35 @@
 import './index.css'
 import {BiPlus} from 'react-icons/bi'
 import {GrFormClose} from 'react-icons/gr'
-import {Popup} from 'reactjs-popup'
-import { useState } from 'react'
+import { useState, useEffect, useId } from 'react'
 import useUserId from '../CustomHook/getUserId'
 import useFetch from '../CustomHook/useFetch'
+import { observer } from 'mobx-react-lite'
+import { useStore } from '../Context/storeContext'
 
-const AddTransaction = () => {
+interface TransactionData{
+  id?: number;
+  name: string;
+  type: string;
+  category: string;
+  amount: number;
+  date: Date;
+  user_id: string|undefined;
+}
+
+interface Response{
+  insert_transactions_one: {
+      id: number,
+      transaction_name: string,
+      type: string,
+      date: string,
+      category: string,
+      amount: number
+  }
+}
+
+const AddTransaction = observer(() => {
+    const {transactionStore} = useStore()
     const userId = useUserId()
     const [transactionName, setTransactionName] = useState('');
     const [transactionType, setTransactionType] = useState('');
@@ -15,13 +38,14 @@ const AddTransaction = () => {
     const [date, setDate] = useState('');
     const [errorMsg, setErrorMsg] = useState(false)
     const [error, setError] = useState('')
+    const [showPopup, setShowPopup] = useState(false)
 
     const url = "https://bursting-gelding-24.hasura.app/api/rest/add-transaction"
-    const transactionDetails = {
+    const transactionDetails: TransactionData = {
       "name": transactionName,
       "type": transactionType,
       "category": category,
-      "amount": amount,
+      "amount": parseInt(amount),
       "date": new Date(date),
       "user_id": userId
     }
@@ -36,17 +60,24 @@ const AddTransaction = () => {
       body: JSON.stringify(transactionDetails)
     }
 
-    const {fetchData} = useFetch(url, options)
+    const {apiStatus, fetchData, data} = useFetch(url, options)
 
+    useEffect(() => {
+      const responseData = data as Response|undefined
+      if (apiStatus === "SUCCESS" && responseData?.insert_transactions_one.id !== undefined){
+        transactionStore.addTransaction({...transactionDetails, 'id': responseData?.insert_transactions_one.id})
+      }
+    }, [apiStatus, data])
+    
     const onSubmitForm = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
       if (transactionName !== '' && transactionType !== '' && category !== '' && amount !== '' && date !== ''){
         setErrorMsg(false)
         if (transactionName.length < 30){
           setErrorMsg(false)
+          setShowPopup(false)
           fetchData()
-          alert('Transaction Added')
-          window.location.reload()
+
         }else{
           setErrorMsg(true)
           setError('*Transaction name should less Than 30 characters')
@@ -60,18 +91,12 @@ const AddTransaction = () => {
     return(
         <>
           {userId !== '3' &&
-          <Popup
-              modal
-              trigger={
-                <button className="add-transaction-button" type="button">
+          <>
+              <button className="add-transaction-button" type="button" onClick={() => setShowPopup(true)}>
                   <BiPlus className="plus-icon"/>
                   <p className="add-transaction-name">Add Transaction</p>
               </button>
-              }
-              className="popup-content"
-              position="right center"
-              closeOnEscape
-            >
+              {showPopup === true &&
               <form className="model" onSubmit={(e) => onSubmitForm(e)}>
               <div className="overlay">
                   <div className="modal-container">
@@ -80,7 +105,7 @@ const AddTransaction = () => {
                         <button
                           className="close-btn"
                           type="button"
-          
+                          onClick={() => setShowPopup(false)}
                         >
                           <GrFormClose size="20"/>
                         </button>
@@ -93,7 +118,7 @@ const AddTransaction = () => {
                       <div className='transaction-input-container'> 
                         <label htmlFor='transaction-type' className='transaction-lable'>Transaction Type</label>
                         <select id='transaction-type' className='transaction-input' onChange={(e) => setTransactionType(e.target.value)}>
-                          <option disabled selected>Select Transaction Type</option>
+                          <option disabled >Select Transaction Type</option>
                           <option value={"credit"}>Credit</option>
                           <option value={"debit"}>Debit</option>
                           </select>
@@ -101,10 +126,10 @@ const AddTransaction = () => {
                       <div className='transaction-input-container'> 
                         <label htmlFor='category' className='transaction-lable'>Category</label>
                         <select id='category' className='transaction-input' onChange={(e) => setCategory(e.target.value) }>
-                          <option disabled selected>Select Category</option>
-                          <option>Entertainment</option>
-                          <option>Food</option>
-                          <option>Shopping</option>
+                          <option disabled >Select Category</option>
+                          <option value={"Entertainment"}>Entertainment</option>
+                          <option value={"Food"}>Food</option>
+                          <option value={"Shopping"}>Shopping</option>
                         </select>
                       </div>
                       <div className='transaction-input-container'> 
@@ -119,10 +144,10 @@ const AddTransaction = () => {
                       <button type='submit' className='Add-transaction-btn'>Add Transaction</button>
                   </div>
                 </div>
-              </form>
-          </Popup>
+              </form>}
+          </>
           }
         </>
     )
-}
+})
 export default AddTransaction

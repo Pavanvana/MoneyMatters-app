@@ -11,6 +11,7 @@ import { useStore } from "../../context/storeContext";
 
 import './index.css'
 import { observer } from "mobx-react";
+import TransactionModel from "../../store/Models/TransactionModel";
 
 interface ResponseData{
   id: number;
@@ -18,7 +19,7 @@ interface ResponseData{
   type: string;
   category: string;
   amount: number;
-  date: Date;
+  date: Date|string;
   user_id: string|undefined;
 }
 
@@ -27,7 +28,7 @@ interface Response {
 }
 
 const Home = () => {
-    const {transactionStore} = useStore()
+    const transactionStore = useStore()
     const userId = useUserId()
 
     const urlOfRecentThreeTr = "https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=100&offset=0"
@@ -69,7 +70,7 @@ const Home = () => {
               user_id: each.user_id
           }
         })
-        transactionStore.setTransactionList(updateTransactionData)
+        transactionStore.setTransactionList(updateTransactionData as any)
       }
     } 
 

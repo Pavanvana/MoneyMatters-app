@@ -1,5 +1,5 @@
 import { useState } from "react"
-import apiStatusConstants from "../utils/apiStatusConstants";
+import apiStatusConstants from "../types/apiStatusTypes";
 
 const useFetch =  (url: string, options: object) => {
     const [data, setData] = useState<object|undefined>()

@@ -1,25 +1,17 @@
-import React, { createContext, useContext } from 'react';
-import TransactionStore from '../store/TransactionsSrote';
+import React, { PropsWithChildren, createContext, useContext, useRef } from 'react';
+import TransactionStore from '../store/TransactionStore';
 
-interface SomeComponentProps {
-  children: React.ReactNode; 
-}
-
-const StoreContext = createContext({
-    transactionStore: new TransactionStore([]),
-});
+const StoreContext = createContext(new TransactionStore([]));
 
 export const useStore = () => {
     return useContext(StoreContext);
 };
 
-export const StoreProvider: React.FC<SomeComponentProps> = ({children}) => {
-    const store = {
-      transactionStore: new TransactionStore([]), 
-    };
+export const StoreProvider: React.FC<PropsWithChildren> = ({children}) => {
+    const store = useRef(new TransactionStore([]));
   
     return (
-      <StoreContext.Provider value={store}>{children}</StoreContext.Provider>
+      <StoreContext.Provider value={store.current}>{children}</StoreContext.Provider>
     );
 };
 

@@ -1,18 +1,9 @@
 import { observable, action, makeObservable, computed } from 'mobx';
-
-interface TransactionData{
-  id: number;
-  name: string;
-  type: string;
-  category: string;
-  amount: number;
-  date: Date|string;
-  user_id: string|undefined;
-}
+import TransactionModel from './Models/TransactionModel';
 
 class TransactionStore {
-    transactionsList: Array<TransactionData>
-    constructor(transactions: Array<TransactionData>) {
+    transactionsList: Array<TransactionModel>
+    constructor(transactions: Array<TransactionModel>) {
         makeObservable(this, {
           transactionsList: observable,
           addTransaction: action.bound,
@@ -23,11 +14,11 @@ class TransactionStore {
         this.transactionsList = transactions
     }
 
-    setTransactionList(transactionList: Array<TransactionData>){
+    setTransactionList(transactionList: Array<TransactionModel>){
       this.transactionsList = transactionList
     }
 
-    addTransaction(obj: TransactionData){
+    addTransaction(obj: TransactionModel){
        this.transactionsList = [obj,...this.transactionsList]
     }
 
@@ -36,19 +27,19 @@ class TransactionStore {
       this.transactionsList = filterTransactions
     }
 
-    editTransaction(obj: TransactionData){
+    updateTransaction(obj: TransactionModel){
       const findIndex = this.transactionsList.findIndex(each => each.id === obj.id)
       this.transactionsList[findIndex] = obj
     }
 
     get creditSum(){
       const creditList = this.transactionsList.filter(each => each.type === 'credit')
-      return creditList.reduce((total, transaction) => total + transaction.amount, 0);
+      return creditList.reduce((total, transaction) => total + (transaction.amount as number), 0);
     }
 
     get debitSum(){
       const debitList = this.transactionsList.filter(each => each.type === 'debit')
-      return debitList.reduce((total, transaction) => total + transaction.amount, 0);
+      return debitList.reduce((total, transaction) => total + (transaction.amount as number), 0);
     }
 }
 

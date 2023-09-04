@@ -11,37 +11,36 @@ import TransactionModel from '../../store/Models/TransactionModel'
 
 interface Props{
     transactionDetails: {
-        id: number;
-        name: string;
-        type: string;
-        category: string;
-        amount:number;
-        date: Date|string;
+        id: number|undefined;
+        name: string|undefined;
+        type: string|undefined;
+        category: string|undefined;
+        amount:number|undefined;
+        date: Date|string|undefined;
     }
     deleteTransaction: Function
 }
 
 interface Response{
     update_transactions_by_pk: {
-        amount:number;
-        category: string;
-        date: Date|string;
-        id: number;
-        transaction_name: string;
-        type: string;
+        amount:number|undefined;
+        category: string|undefined;
+        date: Date|string|undefined;
+        id: number|undefined;
+        transaction_name: string|undefined;
+        type: string|undefined;
     }
 }
 
 const EachTransaction = observer((props: Props) => {
-    const {transactionStore} = useStore()
+    const transactionStore = useStore()
     const userId = useUserId()
     const {transactionDetails, deleteTransaction} = props 
     const {id,name, type, category, amount, date} = transactionDetails
 
     const amountType = type === 'credit' ? '+$' : '-$' 
     const transactionAmountColor = type === 'credit' ? "creditAmount" : "debitAmount"
-
-    const newDate= new Date(date)
+    const newDate= new Date(date as Date)  
     const dateTime = format(newDate, 'dd MMM, HH.mm aaa')
     const formateDate = format(newDate, 'yyyy-MM-dd')
 
@@ -84,7 +83,7 @@ const EachTransaction = observer((props: Props) => {
                 name: obj.transaction_name,
                 type: obj.type,
             }
-            transactionStore.editTransaction({...updateTransactionData, user_id: userId})
+            transactionStore.updateTransaction({...updateTransactionData as any, user_id: userId})
         }
     }, [apiStatus, data, transactionStore, userId])
 
@@ -160,11 +159,11 @@ const EachTransaction = observer((props: Props) => {
                             <p className='p1'>You can update your transaction here</p>
                             <div className='transaction-input-container'> 
                                 <label htmlFor='transaction-name' className='transaction-lable'>Transaction Name</label>
-                                <input id='transaction-name' className='transaction-input' type='text' placeholder='Enter Name' onChange={(e) => tempObj.name =(e.target.value)} value={tempObj.name}/>
+                                <input id='transaction-name' className='transaction-input' type='text' placeholder='Enter Name' onChange={(e) => tempObj.setName(e.target.value)} value={tempObj.name}/>
                             </div>
                             <div className='transaction-input-container'> 
                                 <label htmlFor='transaction-type' className='transaction-lable'>Transaction Type</label>
-                                <select id='transaction-type' className='transaction-input' onChange={(e) => tempObj.type = (e.target.value)} value={tempObj.type}>
+                                <select id='transaction-type' className='transaction-input' onChange={(e) => tempObj.setType(e.target.value)} value={tempObj.type}>
                                 <option disabled selected>Select Transaction Type</option>
                                 <option value={'credit'}>Credit</option>
                                 <option value={'debit'}>Debit</option>
@@ -172,7 +171,7 @@ const EachTransaction = observer((props: Props) => {
                             </div>
                             <div className='transaction-input-container'> 
                                 <label htmlFor='category' className='transaction-lable'>Category</label>
-                                <select id='category' className='transaction-input' value={tempObj.category} onChange={(e) => tempObj.category = (e.target.value)}>
+                                <select id='category' className='transaction-input' value={tempObj.category} onChange={(e) => tempObj.setCategory(e.target.value)}>
                                 <option disabled selected>Select Category</option>
                                 <option value={'Entertainment'}>Entertainment</option>
                                 <option value={'Food'}>Food</option>
@@ -181,11 +180,11 @@ const EachTransaction = observer((props: Props) => {
                             </div>
                             <div className='transaction-input-container'> 
                                 <label htmlFor='amount' className='transaction-lable'>Amount</label>
-                                <input id='amount' className='transaction-input' type='number' placeholder='Enter Name' value={tempObj.amount} onChange={(e) => tempObj.amount = (parseInt(e.target.value))}/>
+                                <input id='amount' className='transaction-input' type='number' placeholder='Enter Name' value={tempObj.amount} onChange={(e) => tempObj.setAmount(parseInt(e.target.value))}/>
                             </div>
                             <div className='transaction-input-container'> 
                                 <label htmlFor='date' className='transaction-lable'>Date</label>
-                                <input id='date' className='transaction-input' type='date' placeholder='Enter Name' value={formateDate} onChange={(e) => tempObj.date = (e.target.value)}/>
+                                <input id='date' className='transaction-input' type='date' placeholder='Enter Name' value={formateDate} onChange={(e) => tempObj.setDate(e.target.value)}/>
                             </div>
                             {errorMsg && <p className='error'>{error}</p>}
                             <button type='submit' className='Add-transaction-btn'>Update Transaction</button>

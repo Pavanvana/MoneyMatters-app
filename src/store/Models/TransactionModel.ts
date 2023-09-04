@@ -1,12 +1,12 @@
 import { observable, makeObservable } from 'mobx';
 
 interface Object{
-    id: number;
-    name: string;
-    type: string;
-    category: string;
-    amount: number;
-    date: Date|string;
+    id: number|undefined;
+    name: string|undefined;
+    type: string|undefined;
+    category: string|undefined;
+    amount: number|undefined;
+    date: Date|string|undefined;
     user_id: string|undefined
 }
 
@@ -33,6 +33,30 @@ class TransactionModel {
             this.date = obj.date
             this.user_id = obj.user_id
         }
+    }
+
+    setId(id: number){
+        this.id = id
+    }
+
+    setType(type: string){
+        this.type = type
+    }
+
+    setAmount(amount: number){
+        this.amount = amount
+    }
+
+    setName(name: string){
+        this.name = name
+    }
+
+    setCategory(category: string){
+        this.category = category
+    } 
+
+    setDate(date: Date|string){
+        this.date = date
     }
 }
 

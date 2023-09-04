@@ -15,18 +15,20 @@ interface TransactionData{
   category: string|undefined;
   amount: number|undefined;
   date: Date|string|undefined;
-  user_id: string|undefined;
+  user_id?: string|undefined;
+}
+
+interface ResponseData{
+  id: number;
+  transaction_name: string;
+  type: string;
+  date: Date;
+  category: string;
+  amount: number;
 }
 
 interface Response{
-  insert_transactions_one: {
-      id: number,
-      transaction_name: string,
-      type: string,
-      date: Date,
-      category: string,
-      amount: number
-  }
+  insert_transactions_one: ResponseData
 }
 
 const newObj = {
@@ -40,7 +42,7 @@ const newObj = {
 }
 
 const AddTransaction = () => {
-    const {transactionStore} = useStore()
+    const transactionStore = useStore()
     const [transactionObject] = useState(new TransactionModel(newObj))
     const userId = useUserId()
     const [errorMsg, setErrorMsg] = useState(false)
@@ -81,7 +83,7 @@ const AddTransaction = () => {
           amount: transaction.amount,
           user_id: userId
         }
-        transactionStore.addTransaction(updateTransactionData)
+        transactionStore.addTransaction(updateTransactionData as any)
       }
     }, [apiStatus, data, url, transactionStore, userId])
     

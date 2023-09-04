@@ -41,7 +41,7 @@ interface Response {
 }
 
 const Transactions = () => {
-    const {transactionStore} = useStore()
+    const transactionStore = useStore()
     const userId = useUserId()
     const [activeTabId, setActiveTabId] = useState(transactionsTypes[0].id)
     const url = "https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=1000&offset=0"

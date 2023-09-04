@@ -1,12 +1,13 @@
 import './index.css'
 import {Popup} from 'reactjs-popup'
 import {GrFormClose} from 'react-icons/gr'
-import useUserId from '../CustomHook/getUserId'
+import useUserId from '../../hooks/getUserId'
 import { useState, useEffect } from 'react'
 import { format } from 'date-fns'
-import useFetch from '../CustomHook/useFetch'
+import useFetch from '../../hooks/useFetch'
 import { observer } from 'mobx-react-lite'
-import { useStore } from '../Context/storeContext'
+import { useStore } from '../../context/storeContext'
+import TransactionModel from '../../store/Models/TransactionModel'
 
 interface Props{
     transactionDetails: {
@@ -15,19 +16,19 @@ interface Props{
         type: string;
         category: string;
         amount:number;
-        date: Date;
+        date: Date|string;
     }
     deleteTransaction: Function
 }
 
 interface Response{
     update_transactions_by_pk: {
-        amount:number
-        category: string
-        date: Date
-        id: number
-        transaction_name: string
-        type: string
+        amount:number;
+        category: string;
+        date: Date|string;
+        id: number;
+        transaction_name: string;
+        type: string;
     }
 }
 
@@ -36,31 +37,28 @@ const EachTransaction = observer((props: Props) => {
     const userId = useUserId()
     const {transactionDetails, deleteTransaction} = props 
     const {id,name, type, category, amount, date} = transactionDetails
+
     const amountType = type === 'credit' ? '+$' : '-$' 
     const transactionAmountColor = type === 'credit' ? "creditAmount" : "debitAmount"
 
-    const newDate = new Date(date)
+    const newDate= new Date(date)
     const dateTime = format(newDate, 'dd MMM, HH.mm aaa')
-
     const formateDate = format(newDate, 'yyyy-MM-dd')
 
-    const [transactionName, setTransactionName] = useState(name);
-    const [transactionType, setTransactionType] = useState(type);
-    const [transactionCategory, setCategory] = useState(category);
-    const [transactionAmount, setAmount] = useState<string|number>(amount);
-    const [transactiobDate, setDate] = useState(formateDate);
+    const [tempObj] = useState(new TransactionModel({...transactionDetails, user_id: userId}))
+
     const [errorMsg, setErrorMsg] = useState(false)
     const [error, setError] = useState('')
     const [showPopup, setShowPopup] = useState(false)
 
     const url = "https://bursting-gelding-24.hasura.app/api/rest/update-transaction"
     const transaction = {
-    "id": id,
-    "name": transactionName,
-    "type": transactionType,
-    "category": transactionCategory,
-    "amount": transactionAmount,
-    "date": new Date(date),
+        id: tempObj.id,
+        name: tempObj.name,
+        type: tempObj.type,
+        amount: tempObj.amount,
+        category: tempObj.category,
+        date: tempObj.date
     }
     const options={
     method: 'POST',
@@ -88,16 +86,22 @@ const EachTransaction = observer((props: Props) => {
             }
             transactionStore.editTransaction({...updateTransactionData, user_id: userId})
         }
-    }, [apiStatus, data])
+    }, [apiStatus, data, transactionStore, userId])
 
     const onClickUpdateForm = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
-      if (transactionName !== '' && transactionType !== '' && transactionCategory !== '' && transactionAmount !== '' && transactiobDate !== ''){
+      if (tempObj.name !== undefined && tempObj.name !== '' && tempObj.type !== '' && tempObj.category !== '' && tempObj.amount !== 0 && tempObj.date !== ''){
         setErrorMsg(false)
-        if (transactionName.length < 30){
+        if (tempObj.name.length < 30){
           setErrorMsg(false)
-          fetchData()
           setShowPopup(false)
+          transactionDetails.name = tempObj.name as string
+          transactionDetails.type = tempObj.type as string
+          transactionDetails.amount = tempObj.amount as number
+          transactionDetails.category = tempObj.category as string
+          transactionDetails.date = tempObj.date as Date 
+          transactionDetails.id = tempObj.id as number
+          fetchData()
         }else{
           setErrorMsg(true)
           setError('*Transaction name should less Than 30 characters')
@@ -156,11 +160,11 @@ const EachTransaction = observer((props: Props) => {
                             <p className='p1'>You can update your transaction here</p>
                             <div className='transaction-input-container'> 
                                 <label htmlFor='transaction-name' className='transaction-lable'>Transaction Name</label>
-                                <input id='transaction-name' className='transaction-input' type='text' placeholder='Enter Name' onChange={(e) => setTransactionName(e.target.value)} value={transactionName}/>
+                                <input id='transaction-name' className='transaction-input' type='text' placeholder='Enter Name' onChange={(e) => tempObj.name =(e.target.value)} value={tempObj.name}/>
                             </div>
                             <div className='transaction-input-container'> 
                                 <label htmlFor='transaction-type' className='transaction-lable'>Transaction Type</label>
-                                <select id='transaction-type' className='transaction-input' onChange={(e) => setTransactionType(e.target.value)} value={transactionType}>
+                                <select id='transaction-type' className='transaction-input' onChange={(e) => tempObj.type = (e.target.value)} value={tempObj.type}>
                                 <option disabled selected>Select Transaction Type</option>
                                 <option value={'credit'}>Credit</option>
                                 <option value={'debit'}>Debit</option>
@@ -168,7 +172,7 @@ const EachTransaction = observer((props: Props) => {
                             </div>
                             <div className='transaction-input-container'> 
                                 <label htmlFor='category' className='transaction-lable'>Category</label>
-                                <select id='category' className='transaction-input' value={transactionCategory} onChange={(e) => setCategory(e.target.value)}>
+                                <select id='category' className='transaction-input' value={tempObj.category} onChange={(e) => tempObj.category = (e.target.value)}>
                                 <option disabled selected>Select Category</option>
                                 <option value={'Entertainment'}>Entertainment</option>
                                 <option value={'Food'}>Food</option>
@@ -177,11 +181,11 @@ const EachTransaction = observer((props: Props) => {
                             </div>
                             <div className='transaction-input-container'> 
                                 <label htmlFor='amount' className='transaction-lable'>Amount</label>
-                                <input id='amount' className='transaction-input' type='number' placeholder='Enter Name' value={transactionAmount} onChange={(e) => setAmount(e.target.value)}/>
+                                <input id='amount' className='transaction-input' type='number' placeholder='Enter Name' value={tempObj.amount} onChange={(e) => tempObj.amount = (parseInt(e.target.value))}/>
                             </div>
                             <div className='transaction-input-container'> 
                                 <label htmlFor='date' className='transaction-lable'>Date</label>
-                                <input id='date' className='transaction-input' type='date' placeholder='Enter Name' value={transactiobDate} onChange={(e) => setDate(e.target.value)}/>
+                                <input id='date' className='transaction-input' type='date' placeholder='Enter Name' value={formateDate} onChange={(e) => tempObj.date = (e.target.value)}/>
                             </div>
                             {errorMsg && <p className='error'>{error}</p>}
                             <button type='submit' className='Add-transaction-btn'>Update Transaction</button>

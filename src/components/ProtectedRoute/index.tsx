@@ -1,6 +1,6 @@
 import { Navigate, Outlet} from 'react-router-dom'
 
-import useUserId from '../CustomHook/getUserId'
+import useUserId from '../../hooks/getUserId'
 
 
 const ProtectedRoute = () => {

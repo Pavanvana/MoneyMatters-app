@@ -5,10 +5,11 @@ import TabItem from "../TabItem";
 import './index.css'
 import { TailSpin } from 'react-loader-spinner'
 import EachTransaction from "../EachTransaction";
-import useUserId from "../CustomHook/getUserId";
-import useFetch from "../CustomHook/useFetch";
-import { observer } from "mobx-react-lite";
-import { useStore } from "../Context/storeContext";
+import useUserId from "../../hooks/getUserId";
+import useFetch from "../../hooks/useFetch";
+import { observer } from "mobx-react";
+import { useStore } from "../../context/storeContext";
+import TransactionModel from "../../store/Models/TransactionModel";
 
 const transactionsTypes = [
     {
@@ -31,7 +32,7 @@ interface ResponseData{
     type: string;
     category: string;
     amount: number;
-    date: Date;
+    date: Date|string;
     user_id: string|undefined;
 }
   
@@ -39,11 +40,10 @@ interface Response {
     transactions: Array<ResponseData>
 }
 
-const Transactions = observer(() => {
+const Transactions = () => {
     const {transactionStore} = useStore()
     const userId = useUserId()
     const [activeTabId, setActiveTabId] = useState(transactionsTypes[0].id)
-
     const url = "https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=1000&offset=0"
     const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
     const options = {
@@ -59,7 +59,7 @@ const Transactions = observer(() => {
 
     useEffect(() => {
         fetchData()
-    }, [])
+    },[])
 
     useEffect(() => {
         getTransactionsData()
@@ -79,7 +79,12 @@ const Transactions = observer(() => {
                     user_id: each.user_id
                 }
             })
-            transactionStore.setTransactionList(updateTransactionData)
+            const sortedList = updateTransactionData.sort((a, b) => new Date(a.date) < new Date(b.date) ? 1 : -1)
+            const listOfTrns = sortedList.map(each => {
+                let obj = new TransactionModel(each)
+                return obj
+              })
+            transactionStore.setTransactionList(listOfTrns as any)
         }
     }
     
@@ -198,6 +203,6 @@ const Transactions = observer(() => {
             </div>
         </div>
     )
-})
+}
 
-export default Transactions
+export default observer(Transactions)

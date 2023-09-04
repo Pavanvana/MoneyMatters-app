@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import SideBar from "../SideBar";
 import AddTransaction from '../AddTransaction'
 import { TailSpin } from 'react-loader-spinner'
-import useUserId from "../CustomHook/getUserId";
+import useUserId from "../../hooks/getUserId";
 import './index.css'
-import useFetch from "../CustomHook/useFetch";
+import useFetch from "../../hooks/useFetch";
 
 interface User  {
     name: string,

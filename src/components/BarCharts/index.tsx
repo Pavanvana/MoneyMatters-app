@@ -7,8 +7,8 @@ import {
   Legend,
 } from "recharts"
 import { TailSpin } from "react-loader-spinner"
-import useUserId from "../CustomHook/getUserId"
-import useFetch from "../CustomHook/useFetch"
+import useUserId from "../../hooks/getUserId"
+import useFetch from "../../hooks/useFetch"
 
 import './index.css'
 

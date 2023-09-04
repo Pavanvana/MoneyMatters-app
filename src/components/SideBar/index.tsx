@@ -7,10 +7,10 @@ import {LuLogOut} from 'react-icons/lu'
 import {GrFormClose} from 'react-icons/gr'
 import Popup from 'reactjs-popup'
 import Cookies from 'js-cookie'
-import useUserId from "../CustomHook/getUserId"
+import useUserId from "../../hooks/getUserId"
 
 import './index.css'
-import useFetch from "../CustomHook/useFetch"
+import useFetch from "../../hooks/useFetch"
 
 interface User {
     name: string;

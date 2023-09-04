@@ -1,4 +1,4 @@
-import { observable, action, makeObservable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 
 interface Object{
     id: number;
@@ -10,7 +10,7 @@ interface Object{
     user_id: string|undefined
 }
 
-class TransactionObject {
+class TransactionModel {
 
     id: number|undefined;
     name: string|undefined;
@@ -20,7 +20,7 @@ class TransactionObject {
     date: Date|string|undefined;
     user_id: string|undefined
 
-    constructor (obj: Object|null) {
+    constructor (obj: Object) {
         makeObservable(this,{
             id: observable,name: observable,type : observable,category : observable,amount : observable,date : observable,user_id : observable,
         })
@@ -36,4 +36,4 @@ class TransactionObject {
     }
 }
 
-export default TransactionObject
+export default TransactionModel

@@ -1,8 +1,8 @@
 import {Navigate, useNavigate} from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import Cookies from 'js-cookie'
-import useUserId from '../CustomHook/getUserId'
-import useFetch from '../CustomHook/useFetch'
+import useUserId from '../../hooks/getUserId'
+import useFetch from '../../hooks/useFetch'
 
 import './index.css'
 

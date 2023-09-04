@@ -1,5 +1,4 @@
 import { observable, action, makeObservable, computed } from 'mobx';
-import TransactionObject from './Models/TransactionObject';
 
 interface TransactionData{
   id: number;
@@ -7,7 +6,7 @@ interface TransactionData{
   type: string;
   category: string;
   amount: number;
-  date: Date;
+  date: Date|string;
   user_id: string|undefined;
 }
 
@@ -16,8 +15,8 @@ class TransactionStore {
     constructor(transactions: Array<TransactionData>) {
         makeObservable(this, {
           transactionsList: observable,
-          addTransaction: action,
-          deleteTransaction: action,
+          addTransaction: action.bound,
+          deleteTransaction: action.bound,
           creditSum: computed,
           debitSum: computed,
         });
@@ -25,12 +24,7 @@ class TransactionStore {
     }
 
     setTransactionList(transactionList: Array<TransactionData>){
-      const sortedList = transactionList.sort((a, b) => new Date(a.date) < new Date(b.date) ? 1 : -1)
-      const listOfTrns = sortedList.map(each => {
-        let obj = new TransactionObject(each)
-        return obj
-      })
-      this.transactionsList = listOfTrns as TransactionData[] 
+      this.transactionsList = transactionList
     }
 
     addTransaction(obj: TransactionData){

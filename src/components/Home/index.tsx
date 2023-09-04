@@ -5,12 +5,12 @@ import SideBar from "../SideBar"
 import BarCharts from '../BarCharts'
 import { TailSpin } from 'react-loader-spinner'
 import EachTransaction from "../EachTransaction";
-import useUserId from '../CustomHook/getUserId'
-import useFetch from "../CustomHook/useFetch";
-import { useStore } from "../Context/storeContext";
+import useUserId from '../../hooks/getUserId'
+import useFetch from "../../hooks/useFetch";
+import { useStore } from "../../context/storeContext";
 
 import './index.css'
-import { observer } from "mobx-react-lite";
+import { observer } from "mobx-react";
 
 interface ResponseData{
   id: number;
@@ -26,7 +26,7 @@ interface Response {
   transactions: Array<ResponseData>
 }
 
-const Home = observer(() => {
+const Home = () => {
     const {transactionStore} = useStore()
     const userId = useUserId()
 
@@ -179,5 +179,5 @@ const Home = observer(() => {
             </div>
         </div>
     )
-})
-export default Home
+}
+export default observer(Home)

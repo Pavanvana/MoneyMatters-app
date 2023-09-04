@@ -6,7 +6,7 @@ import Transactions from './components/Transactions'
 import Profile from './components/Profile'
 import NotFound from './components/NotFound'
 import ProtectedRoute from './components/ProtectedRoute'
-import {StoreProvider}  from './components/Context/storeContext'
+import {StoreProvider}  from './context/storeContext'
 
 import './App.css'
 

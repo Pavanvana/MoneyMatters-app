@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import TransactionStore from '../Store/TransactionsSrote';
+import TransactionStore from '../store/TransactionsSrote';
 
 interface SomeComponentProps {
   children: React.ReactNode; 

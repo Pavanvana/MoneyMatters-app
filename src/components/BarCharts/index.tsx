@@ -6,9 +6,9 @@ import {
   YAxis,
   Legend,
 } from "recharts"
-import Loader from "react-loader-spinner"
-import useUserId from "../CustomHook/getUserId"
-import useFetch from "../CustomHook/useFetch"
+import { TailSpin } from "react-loader-spinner"
+import useUserId from "../../hooks/getUserId"
+import useFetch from "../../hooks/useFetch"
 
 import './index.css'
 
@@ -82,7 +82,7 @@ const BarCharts = () => {
 
   const renderLoadingView = () => (
       <div className="loader-container">
-        <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
+        <TailSpin color="#4094EF" height={50} width={50} />
       </div>
   )
   const renderBarchart = () => {

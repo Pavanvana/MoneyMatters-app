@@ -1,29 +1,28 @@
 {
-  "homepage": "http://Pavanvana.github.io/",
-  "name": "money-matters",
+  "homepage": "",
+  "name": "moneymaters",
   "version": "0.1.0",
-  "private": true,
+  "private": false,
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^29.5.4",
     "@types/js-cookie": "^3.0.3",
-    "@types/node": "^20.5.6",
-    "@types/react": "^18.2.21",
-    "@types/react-dom": "^18.2.7",
+    "cookies-ts": "^1.0.5",
     "date-fns": "^2.30.0",
     "js-cookie": "^3.0.5",
+    "mobx": "^6.10.1",
+    "mobx-react": "^9.0.1",
+    "mobx-react-lite": "^4.0.4",
     "react": "^18.2.0",
-    "react-datetime": "^3.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.10.1",
-    "react-loader-spinner": "^4.0.0",
-    "react-router-dom": "5.3.0",
+    "react-loader-spinner": "^5.3.4",
+    "react-router-dom": "6.14.2",
     "react-scripts": "5.0.1",
     "reactjs-popup": "^2.0.5",
     "recharts": "^2.7.2",
-    "typescript": "^5.2.2",
+    "uuid": "^9.0.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -53,7 +52,6 @@
     ]
   },
   "devDependencies": {
-    "@types/react-router-dom": "^5.3.3",
     "gh-pages": "^5.0.0"
   }
 }

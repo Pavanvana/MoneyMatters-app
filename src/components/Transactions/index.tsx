@@ -3,10 +3,13 @@ import SideBar from "../SideBar";
 import AddTransaction from '../AddTransaction'
 import TabItem from "../TabItem";
 import './index.css'
-import Loader from 'react-loader-spinner'
+import { TailSpin } from 'react-loader-spinner'
 import EachTransaction from "../EachTransaction";
-import useUserId from "../CustomHook/getUserId";
-import useFetch from "../CustomHook/useFetch";
+import useUserId from "../../hooks/getUserId";
+import useFetch from "../../hooks/useFetch";
+import { observer } from "mobx-react";
+import { useStore } from "../../context/storeContext";
+import TransactionModel from "../../store/Models/TransactionModel";
 
 const transactionsTypes = [
     {
@@ -29,8 +32,8 @@ interface ResponseData{
     type: string;
     category: string;
     amount: number;
-    date: Date;
-    user_id: number;
+    date: Date|string;
+    user_id: string|undefined;
 }
   
 interface Response {
@@ -38,11 +41,10 @@ interface Response {
 }
 
 const Transactions = () => {
+    const transactionStore = useStore()
     const userId = useUserId()
     const [activeTabId, setActiveTabId] = useState(transactionsTypes[0].id)
-    const [transactionsList, setTransactionList] = useState<Array<ResponseData>>([])
-
-    const url = "https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=1000&offset=1"
+    const url = "https://bursting-gelding-24.hasura.app/api/rest/all-transactions/?limit=1000&offset=0"
     const accesToken = "g08A3qQy00y8yFDq3y6N1ZQnhOPOa4msdie5EtKS1hFStar01JzPKrtKEzYY2BtF"
     const options = {
         method: 'GET',
@@ -57,7 +59,7 @@ const Transactions = () => {
 
     useEffect(() => {
         fetchData()
-    }, [])
+    },[])
 
     useEffect(() => {
         getTransactionsData()
@@ -66,8 +68,23 @@ const Transactions = () => {
     const getTransactionsData = () => {
         const response = data as Response|undefined
         if (response !== undefined){
-            const transactionsList = response.transactions.sort((a, b) => new Date(a.date) < new Date(b.date) ? 1 : -1)
-            setTransactionList([...transactionsList])
+            const updateTransactionData = response.transactions.map(each => {
+                return {
+                    amount: each.amount,
+                    category: each.category,
+                    date: each.date,
+                    id: each.id,
+                    name: each.transaction_name,
+                    type: each.type,
+                    user_id: each.user_id
+                }
+            })
+            const sortedList = updateTransactionData.sort((a, b) => new Date(a.date) < new Date(b.date) ? 1 : -1)
+            const listOfTrns = sortedList.map(each => {
+                let obj = new TransactionModel(each)
+                return obj
+              })
+            transactionStore.setTransactionList(listOfTrns as any)
         }
     }
     
@@ -95,7 +112,7 @@ const Transactions = () => {
 
     const renderLoadingView = () => (
         <div className="loader-container">
-          <Loader type="TailSpin" color="#4094EF" height={50} width={50} />
+          <TailSpin color="#4094EF" height={50} width={50} />
         </div>
     )
 
@@ -114,13 +131,16 @@ const Transactions = () => {
             },
             body: JSON.stringify(deleteTransactionId)
         }
-        await fetch(url, options)
-        alert('Transaction Deleted')
-        window.location.reload()
+        const response = await fetch(url, options)
+        if (response.ok){
+            alert("Transaction deleted successfully")
+            transactionStore.deleteTransaction(id)
+        }
     }
 
     const renderSuccessView = () => {
-        const filterTrList = transactionsList.filter(eachTr => {
+        const transactionsList = transactionStore.transactionsList
+        const filterTrList = transactionsList.filter((eachTr: any) => {
             if (activeTabId === 1){
                 return eachTr
             }else if (activeTabId === 2){
@@ -139,7 +159,7 @@ const Transactions = () => {
             </div>
             <hr className="hr-line"/>
             <ul className="transactions-container">
-                {filterTrList.map(eachTransaction => (
+                {filterTrList.map((eachTransaction: any) => (
                     <EachTransaction key={eachTransaction.id} deleteTransaction={deleteTransaction} transactionDetails={eachTransaction} />
                 ))}
             </ul>
@@ -185,4 +205,4 @@ const Transactions = () => {
     )
 }
 
-export default Transactions
+export default observer(Transactions)

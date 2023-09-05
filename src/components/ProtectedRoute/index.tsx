@@ -1,18 +1,10 @@
-import {Route, Redirect} from 'react-router-dom'
+import { Navigate, Outlet} from 'react-router-dom'
 
-import useUserId from '../CustomHook/getUserId'
+import useUserId from '../../hooks/getUserId'
 
-interface Props{
-  component: React.ComponentType<any> | any;
-  exact: boolean
-  path: string
-}
 
-const ProtectedRoute = (props: Props) => {
+const ProtectedRoute = () => {
   const userId = useUserId()
-  if (userId === undefined) {
-    return <Redirect to ="/login"/>
-  }
-  return <Route {...props} />
+  return userId === undefined ? <Navigate to ="/login"/> : <Outlet />
 }
 export default ProtectedRoute

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import {Link,useHistory} from "react-router-dom"
+import {Link,useNavigate} from "react-router-dom"
 import {AiFillHome} from 'react-icons/ai'
 import {RiMoneyDollarBoxFill} from 'react-icons/ri'
 import {CgProfile} from 'react-icons/cg'
@@ -7,10 +7,10 @@ import {LuLogOut} from 'react-icons/lu'
 import {GrFormClose} from 'react-icons/gr'
 import Popup from 'reactjs-popup'
 import Cookies from 'js-cookie'
-import useUserId from "../CustomHook/getUserId"
+import useUserId from "../../hooks/getUserId"
 
 import './index.css'
-import useFetch from "../CustomHook/useFetch"
+import useFetch from "../../hooks/useFetch"
 
 interface User {
     name: string;
@@ -28,7 +28,7 @@ interface Props{
 const SideBar = (props: Props) => {
     const userId = useUserId()
     const {activeTab} = props
-    const history = useHistory()
+    const navigate = useNavigate()
     const [profileDetails, setProfileDetails] = useState<User>()
 
     const url = 'https://bursting-gelding-24.hasura.app/api/rest/profile'
@@ -60,7 +60,7 @@ const SideBar = (props: Props) => {
 
     const onClickLogout = () => {
         Cookies.remove('user_id')
-        history.replace('/login')
+        navigate('/login')
     }
 
     const transactionsName = userId === '3' ? "All Transactions" : "Transactions"

@@ -1,8 +1,8 @@
-import {Redirect, useHistory} from 'react-router-dom'
+import {Navigate, useNavigate} from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import Cookies from 'js-cookie'
-import useUserId from '../CustomHook/getUserId'
-import useFetch from '../CustomHook/useFetch'
+import useUserId from '../../hooks/getUserId'
+import useFetch from '../../hooks/useFetch'
 
 import './index.css'
 
@@ -15,7 +15,7 @@ interface Response {
 }
 
 const LoginPage = () => {
-  const history = useHistory()
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showErrorMsg, setShowErrorMsg] = useState(false)
@@ -42,7 +42,7 @@ const LoginPage = () => {
     if (data !== undefined ){
       getData()
     }
-  }, [data])
+  }, [data,url])
 
   const getData = () => {
     const response = data as Response|undefined
@@ -57,7 +57,7 @@ const LoginPage = () => {
 
   const onSubmitSuccess = (userId:number) => {
     Cookies.set('user_id', userId.toString(), {expires: 30})
-    history.replace('/')
+    navigate('/')
   }
 
   const onSubmitFailure = (errorMsg: string) => {
@@ -71,7 +71,7 @@ const LoginPage = () => {
   }
 
   if (userId !== undefined){
-    return <Redirect to="/" />
+    return <Navigate to="/" />
   }
   return (
     <div className="login-container">

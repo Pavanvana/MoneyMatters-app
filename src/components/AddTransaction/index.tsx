@@ -15,7 +15,7 @@ interface TransactionData{
   category: string|undefined;
   amount: number|undefined;
   date: Date|string|undefined;
-  user_id?: string|undefined;
+  user_id: string|undefined;
 }
 
 interface ResponseData{

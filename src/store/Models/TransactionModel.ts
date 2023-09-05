@@ -1,4 +1,4 @@
-import { observable, makeObservable } from 'mobx';
+import { observable, makeObservable, action } from 'mobx';
 
 interface Object{
     id: number|undefined;
@@ -22,7 +22,18 @@ class TransactionModel {
 
     constructor (obj: Object) {
         makeObservable(this,{
-            id: observable,name: observable,type : observable,category : observable,amount : observable,date : observable,user_id : observable,
+            id: observable,
+            name: observable,
+            type : observable,
+            category : observable,
+            amount : observable,
+            date : observable,
+            user_id : observable,
+            setAmount: action.bound,
+            setCategory: action.bound,
+            setDate: action.bound,
+            setType: action.bound,
+            setName: action.bound
         })
         if (obj !== null){
             this.id = obj.id
@@ -33,10 +44,6 @@ class TransactionModel {
             this.date = obj.date
             this.user_id = obj.user_id
         }
-    }
-
-    setId(id: number){
-        this.id = id
     }
 
     setType(type: string){

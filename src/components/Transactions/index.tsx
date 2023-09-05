@@ -140,7 +140,7 @@ const Transactions = () => {
 
     const renderSuccessView = () => {
         const transactionsList = transactionStore.transactionsList
-        const filterTrList = transactionsList.filter(eachTr => {
+        const filterTrList = transactionsList.filter((eachTr: any) => {
             if (activeTabId === 1){
                 return eachTr
             }else if (activeTabId === 2){
@@ -159,7 +159,7 @@ const Transactions = () => {
             </div>
             <hr className="hr-line"/>
             <ul className="transactions-container">
-                {filterTrList.map(eachTransaction => (
+                {filterTrList.map((eachTransaction: any) => (
                     <EachTransaction key={eachTransaction.id} deleteTransaction={deleteTransaction} transactionDetails={eachTransaction} />
                 ))}
             </ul>

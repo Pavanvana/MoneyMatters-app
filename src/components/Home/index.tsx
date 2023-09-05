@@ -11,7 +11,6 @@ import { useStore } from "../../context/storeContext";
 
 import './index.css'
 import { observer } from "mobx-react";
-import TransactionModel from "../../store/Models/TransactionModel";
 
 interface ResponseData{
   id: number;

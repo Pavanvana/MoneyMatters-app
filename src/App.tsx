@@ -9,6 +9,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import {StoreProvider}  from './context/storeContext'
 
 import './App.css'
+import Launches from './components/Launches'
 
 const App = () => {
   return(
@@ -20,6 +21,7 @@ const App = () => {
           <Route  path="/transactions" element={<Transactions/>}/>
           <Route  path="/profile" element={<Profile/>}/>
         </Route>
+        <Route path='launches' element={<Launches/>}/>
         <Route path="/not-found" element={<NotFound/>} />
       </Routes>
     </StoreProvider>

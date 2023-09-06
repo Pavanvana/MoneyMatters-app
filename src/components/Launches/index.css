@@ -1,0 +1,28 @@
+.loader{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.app-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.container{
+    height: 90vh;
+    width: 80vw;
+    border: 1px solid gray;
+    overflow: auto;
+    border-radius: 10px;
+}
+.video-button{
+    border: none;
+    outline: none;
+    background-color:blue;
+    color: #ffffff;
+    border-radius: 4px;
+    width: 100px;
+    height: 30px;
+}

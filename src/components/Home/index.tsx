@@ -8,7 +8,8 @@ import EachTransaction from "../EachTransaction";
 import useUserId from '../../hooks/getUserId'
 import useFetch from "../../hooks/useFetch";
 import { useStore } from "../../context/storeContext";
-
+import { useMachine } from "@xstate/react";
+import { apiMachine } from "../../machines/apiMachine"; 
 import './index.css'
 import { observer } from "mobx-react";
 
@@ -42,23 +43,31 @@ const Home = () => {
         'x-hasura-user-id': userId
       }
     }
-    const {data, apiStatus, fetchData} = useFetch(urlOfRecentThreeTr, options)
+    const { fetchData} = useFetch(urlOfRecentThreeTr, options)
+
+    const [state, send] = useMachine(apiMachine, {
+      services: {
+          FETCH_DATA : async (context, event) => {
+              const data = await fetchData()
+              return data
+          },
+      }
+    })
+    useEffect(() => {
+        send({
+            type: 'FETCH'
+        })
+    }, [])
     
     useEffect(() => {
-      fetchData()
-    }, [])
-
-    useEffect(() => {
-      if (apiStatus === "SUCCESS"){
-        getRecentThreeTransactions()
-      }
-    }, [userId, apiStatus, data])
+      getRecentThreeTransactions()
+    }, [state.value, state.context.data])
 
     const getRecentThreeTransactions = () => {
-      const response = data as Response|undefined
-      if (response !== undefined){
+      const response = state.context.data as Response|null
+      if (response !== null){
         const recentThreeTransactions = response.transactions.sort((a, b) => new Date(a.date) < new Date(b.date) ? 1 : -1)
-        const updateTransactionData = recentThreeTransactions.map(each => {
+        const updateTransactionData: any = recentThreeTransactions.map(each => {
           return {
               amount: each.amount,
               category: each.category,
@@ -69,7 +78,7 @@ const Home = () => {
               user_id: each.user_id
           }
         })
-        transactionStore.setTransactionList(updateTransactionData as any)
+        transactionStore.setTransactionList(updateTransactionData)
       }
     } 
 
@@ -134,12 +143,12 @@ const Home = () => {
     )
 
     const renderOnApiStatus = () => {
-      switch (apiStatus) {
-        case 'SUCCESS':
+      switch (true) {
+        case state.matches('success'):
             return renderSuccessView()
-        case 'FAILURE':
+        case state.matches('error'):
             return renderFailureView()
-        case 'IN_PROGRESS':
+        case state.matches('loading'):
             return renderLoadingView()
         default:
             return null

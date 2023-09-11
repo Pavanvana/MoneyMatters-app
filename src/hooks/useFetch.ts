@@ -12,6 +12,7 @@ const useFetch =  (url: string, options: object) => {
             const fetchedData = await response.json()
             setData(fetchedData)
             onSuccess?.(fetchedData)
+            return fetchedData
         }else{
             setApiStatus('FAILURE')
             onError?.(new Error())

@@ -10,6 +10,8 @@ import useFetch from "../../hooks/useFetch";
 import { observer } from "mobx-react";
 import { useStore } from "../../context/storeContext";
 import TransactionModel from "../../store/Models/TransactionModel";
+import { useMachine } from "@xstate/react";
+import { apiMachine } from "../../machines/apiMachine"; 
 
 const transactionsTypes = [
     {
@@ -55,20 +57,31 @@ const Transactions = () => {
             'x-hasura-user-id': userId
         }
     }
-    const {data, apiStatus, fetchData} = useFetch(url,options)
+    const {fetchData} = useFetch(url,options)
+    
+    const [state, send] = useMachine(apiMachine, {
+        services: {
+            FETCH_DATA : async (context, event) => {
+                const data = await fetchData()
+                return data
+            },
+        }
+    })
 
     useEffect(() => {
-        fetchData()
-    },[])
+        send({
+            type: 'FETCH'
+        })
+    }, [])
 
     useEffect(() => {
         getTransactionsData()
-    }, [apiStatus, data])
+    }, [state.value, state.context.data])
 
     const getTransactionsData = () => {
-        const response = data as Response|undefined
-        if (response !== undefined){
-            const updateTransactionData = response.transactions.map(each => {
+        const response = state.context.data as Response | null
+        if (response !== null){
+            const updateTransactionData = response.transactions.map((each: ResponseData) => {
                 return {
                     amount: each.amount,
                     category: each.category,
@@ -168,12 +181,12 @@ const Transactions = () => {
     }
 
     const renderOnApiStatus = () => {
-        switch (apiStatus) {
-        case 'SUCCESS':
+        switch (true) {
+        case state.matches('success'):
             return renderSuccessView()
-        case 'FAILURE':
+        case state.matches('error'):
             return renderFailureView()
-        case 'IN_PROGRESS':
+        case state.matches('loading'):
             return renderLoadingView()
         default:
             return null

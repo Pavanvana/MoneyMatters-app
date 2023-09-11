@@ -11,6 +11,8 @@ import useUserId from "../../hooks/getUserId"
 
 import './index.css'
 import useFetch from "../../hooks/useFetch"
+import { useMachine } from "@xstate/react";
+import { apiMachine } from "../../machines/apiMachine"; 
 
 interface User {
     name: string;
@@ -41,19 +43,29 @@ const SideBar = (props: Props) => {
             'x-hasura-user-id': userId
         }
     }
-    const {data, fetchData} = useFetch(url, options)
+    const { fetchData} = useFetch(url, options)
 
-    useEffect(() => {
-        fetchData()
-    }, [])
+    const [state, send] = useMachine(apiMachine, {
+        services: {
+            FETCH_DATA : async (context, event) => {
+                const data = await fetchData()
+                return data
+            },
+        }
+      })
+      useEffect(() => {
+          send({
+              type: 'FETCH'
+          })
+      }, [])
 
     useEffect(() => {
         fetchProfileDetails()
-    }, [userId, data])
+    }, [userId, state.context.data])
     
     const fetchProfileDetails= async () => {
-        const profile = data as Users|undefined
-        if (profile !== undefined){
+        const profile = state.context.data as Users|null
+        if (profile !== null){
             setProfileDetails(profile.users[0])
         } 
     }

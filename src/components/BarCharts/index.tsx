@@ -9,6 +9,8 @@ import {
 import { TailSpin } from "react-loader-spinner"
 import useUserId from "../../hooks/getUserId"
 import useFetch from "../../hooks/useFetch"
+import { useMachine } from "@xstate/react";
+import { apiMachine } from "../../machines/apiMachine"; 
 
 import './index.css'
 
@@ -38,19 +40,29 @@ const BarCharts = () => {
       'x-hasura-user-id': userId
     }
   }
-  const {data, apiStatus, fetchData} = useFetch(url, options)
+  const {fetchData} = useFetch(url, options)
 
+  const [state, send] = useMachine(apiMachine, {
+    services: {
+        FETCH_DATA : async (context, event) => {
+            const data = await fetchData()
+            return data
+        },
+    }
+  })
   useEffect(() => {
-    fetchData()
+      send({
+          type: 'FETCH'
+      })
   }, [])
 
   useEffect(() => {
     getLast7daysCreditsAndDebits()
-  }, [userId, apiStatus, data])
+  }, [userId, state.value, state.context.data])
   
   const getLast7daysCreditsAndDebits = async () => {
-    const dataOf7Days = data as Response|undefined
-    if (dataOf7Days !== undefined){
+    const dataOf7Days = state.context.data as Response|null
+    if (dataOf7Days !== null){
       if (userId === '3'){
         setLast7DaysCreditsAndDebitsDate(dataOf7Days.last_7_days_transactions_totals_admin)
       }else{
@@ -165,12 +177,12 @@ const BarCharts = () => {
     )
   }
   const renderOnApiStatus = () => {
-    switch (apiStatus) {
-      case 'SUCCESS':
+    switch (true) {
+      case state.matches('success'):
           return renderBarchart()
-      case 'FAILURE':
+      case state.matches('error'):
           return renderFailureView()
-      case 'IN_PROGRESS':
+      case state.matches('loading'):
           return renderLoadingView()
       default:
           return null

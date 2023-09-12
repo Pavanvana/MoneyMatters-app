@@ -17,7 +17,7 @@ const TabItem = (props:Props) => {
     }
     const activeTabClassName = isActive && "active-class"
     return(
-        <li>
+        <li className='tabitem'>
             <button type='button' className={`transactions-type ${activeTabClassName}`} onClick={onClickType}>{type}</button>
         </li>
     )

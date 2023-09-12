@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import SideBar from "../SideBar";
 import AddTransaction from '../AddTransaction'
 import TabItem from "../TabItem";
-import './index.css'
 import { TailSpin } from 'react-loader-spinner'
 import EachTransaction from "../EachTransaction";
 import useUserId from "../../hooks/getUserId";
@@ -11,7 +10,9 @@ import { observer } from "mobx-react";
 import { useStore } from "../../context/storeContext";
 import TransactionModel from "../../store/Models/TransactionModel";
 import { useMachine } from "@xstate/react";
-import { apiMachine } from "../../machines/apiMachine"; 
+import { apiMachine } from "../../machines/apiMachine";
+
+import './index.css'
 
 const transactionsTypes = [
     {
@@ -124,7 +125,7 @@ const Transactions = () => {
     )
 
     const renderLoadingView = () => (
-        <div className="loader-container">
+        <div className="flex flex-row justify-center items-center h-100vh w-70vw">
           <TailSpin color="#4094EF" height={50} width={50} />
         </div>
     )
@@ -164,14 +165,14 @@ const Transactions = () => {
         })
         return(
             <>
-            <div className="headings-container">
-                <p className="headings h1">Transaction Name</p>
-                <p className="headings h2">Category</p>
-                <p className="headings h3">Date</p>
-                <p className="headings h4">Amount</p>
+            <div className="flex justify-between items-center pl-50px pt-10px pr-30px mb-5px">
+                <p className="text-#343C6A font-sans text-18px roman font-bold mr-32">Transaction Name</p>
+                <p className="text-#343C6A font-sans text-18px roman font-bold ml-16">Category</p>
+                <p className="text-#343C6A font-sans text-18px roman font-bold ml-16 mr-10">Date</p>
+                <p className="text-#343C6A font-sans text-18px roman font-bold ml-10 mr-40">Amount</p>
             </div>
-            <hr className="hr-line"/>
-            <ul className="transactions-container">
+            <hr className="w-1100px  self-center"/>
+            <ul className="flex flex-col mt-5 ml-5 border-#E2E2E2 bg-white pl-0 pb-2 br-5 rounded-5 overflow-auto h-80vh">
                 {filterTrList.map((eachTransaction: any) => (
                     <EachTransaction key={eachTransaction.id} deleteTransaction={deleteTransaction} transactionDetails={eachTransaction} />
                 ))}
@@ -198,19 +199,19 @@ const Transactions = () => {
     }
 
     return(
-        <div className="main-container">
+        <div className="flex flex-row">
             <SideBar activeTab="transactions"/>
             <div>
-                <div className="heading-container">
-                <h1 className="accounts-heading">Transactions</h1>
+                <div className="flex flex-row w-1100px pl-30px pt-24px justify-between items-center bg-white fixed">
+                <h1 className="text-#343C6A text-24px roman font-bold leading-normal pl-6 font-sans">Transactions</h1>
                 <AddTransaction/>
                 </div>
-                <ul className="transactions-types">
+                <ul className="flex flex-row list-reset ml-2">
                     {transactionsTypes.map(eachType => (
                         <TabItem key={eachType.id} setActiveTabId={changeActiveTabId} isActive={eachType.id === activeTabId}  transactionType={eachType}/>
                     ))}
                 </ul>
-                <div className="transactions-container">
+                <div className="flex flex-col mt-5 ml-5 bg-white pl-0 pb-2 br-5 h-80vh">
                     {renderOnApiStatus()}
                 </div>
             </div>

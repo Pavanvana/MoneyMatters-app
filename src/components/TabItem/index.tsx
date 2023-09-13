@@ -1,25 +1,3 @@
-import './index.css'
+import TabItem from "./TabItem";
 
-interface Props{
-    transactionType: {
-        id: number;
-        type: string;
-    }
-    setActiveTabId: Function 
-    isActive: boolean
-}
-
-const TabItem = (props:Props) => {
-    const {transactionType, setActiveTabId, isActive} = props 
-    const {id, type} = transactionType
-    const onClickType = () => {
-        setActiveTabId(id)
-    }
-    const activeTabClassName = isActive && "active-class"
-    return(
-        <li className='tabitem'>
-            <button type='button' className={`transactions-type ${activeTabClassName}`} onClick={onClickType}>{type}</button>
-        </li>
-    )
-}
 export default TabItem

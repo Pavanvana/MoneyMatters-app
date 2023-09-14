@@ -4,6 +4,8 @@ import Cookies from 'js-cookie'
 import useUserId from '../../hooks/useUserId'
 import useFetch from '../../hooks/useFetch'
 
+import { useTranslation } from 'react-i18next';
+
 import './index.css'
 
 interface Response {
@@ -15,6 +17,7 @@ interface Response {
 }
 
 const LoginPage = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -37,6 +40,11 @@ const LoginPage = () => {
     body: JSON.stringify(userDetails)
   }
   const {data, fetchData} = useFetch(url, options)
+
+  useEffect(() => {
+    const lng = navigator.language
+    i18n.changeLanguage(lng)
+  })
 
   useEffect(() => {
     if (data !== undefined ){
@@ -82,36 +90,36 @@ const LoginPage = () => {
             alt="website logo"
             className="logo"
           />
-          <h1 className="heading">Money Matters</h1>
+          <h1 className="heading">{t('title')}</h1>
           <div className="input-container">
             <label className="label" htmlFor="email">
-              EMAIL
+            {t('email')}
             </label>
             <input
               className="input"
               type="text"
               id="email"
-              placeholder="Email"
+              placeholder={t('emailPlaceHolder')}
               onChange={(e) => setEmail(e.target.value)}
               value={email}
             />
           </div>
           <div className="input-container">
             <label className="label" htmlFor="password">
-              PASSWORD
+              {t('password')}
             </label>
             <input
               className="input"
               type="password"
               id="password"
-              placeholder="Password"
+              placeholder={t('passwordPlaceHolder')}
               onChange={(e) => setPassword(e.target.value)}
               value={password}
             />
           </div>
           {showErrorMsg && <p className="error-msg">{errorMsg}</p>}
           <button type="submit" className="login-button">
-            Login
+            {t('login')}
           </button>
         </form>
       </div>

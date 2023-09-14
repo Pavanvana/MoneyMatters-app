@@ -124,3 +124,10 @@
     background: #FFF;
     padding-right: 50px;
 }
+.loader-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    width: 70vw;
+  }

@@ -1,0 +1,5 @@
+export const LOG_IN_PATH = '/login'
+export const HOME_PATH = '/'
+export const TRANSACTIONS_PATH = '/transactions'
+export const PROFILE_PATH = '/profile'
+export const NOT_FOUND_PATH = '*'

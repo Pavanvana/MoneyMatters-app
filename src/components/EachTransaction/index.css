@@ -52,10 +52,10 @@
     margin-right: 60px;
     width: 150px;
 }
-.creditAmount{
+.credit-amount-color{
     color: #16DBAA;
 }
-.debitAmount{
+.debit-amount-color{
     color: #FE5C73;
 }
 .edit-delete-button{

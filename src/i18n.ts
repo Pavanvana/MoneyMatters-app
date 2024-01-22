@@ -25,6 +25,16 @@ i18n
             'passwordPlaceHolder': 'మీ పాస్వర్డ్ ని నమోదుచేయండి',
         },
       },
+      hi: {
+        translation: {
+            'title': 'पैसा माइने रखता है',
+            'email': 'ईमेल',
+            'password': 'पासवर्ड',
+            'login': 'लॉग इन करें',
+            'emailPlaceHolder': 'अपना ईमेल दर्ज करें ',
+            'passwordPlaceHolder': 'अपना ईमेल दर्ज करें',
+        },
+      },
     },
     lng: 'en',
     fallbackLng: 'en',
